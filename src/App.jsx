@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Home, List, MapPin, Users, MessageCircle, CheckCircle, Navigation, Award, BookOpen, Star, Send, Camera, Plus, Trash2 } from 'lucide-react';
+import { Home, List, MapPin, Users, MessageCircle, CheckCircle, Navigation, Award, BookOpen, Star, Send, Camera, Plus, Trash2, Share, PlusSquare } from 'lucide-react';
 
 export default function App() {
   const [profile, setProfile] = useState(null);
@@ -7,6 +7,30 @@ export default function App() {
   const [currentView, setCurrentView] = useState('home');
   const [isFirstLaunch, setIsFirstLaunch] = useState(true);
   const [toast, setToast] = useState(null);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+
+  useEffect(() => {
+    // Check if it's iOS and not already installed
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+    
+    // Support for Android (beforeinstallprompt)
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      // Show prompt on Android
+      if (!isStandalone) {
+        setShowInstallPrompt(true);
+      }
+    });
+
+    // Show prompt after a short delay if on iOS and not standalone
+    if (isIOS && !isStandalone) {
+      const timer = setTimeout(() => {
+        setShowInstallPrompt(true);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   useEffect(() => {
     const savedProfile = localStorage.getItem('unihub_profile');
@@ -87,6 +111,38 @@ export default function App() {
         <NavItem icon={<Users />} label="Tutor" active={currentView === 'tutoring'} onClick={() => setCurrentView('tutoring')} />
         <NavItem icon={<MessageCircle />} label="Chat" active={currentView === 'chat'} onClick={() => setCurrentView('chat')} />
       </nav>
+
+      {showInstallPrompt && (
+        <div className="install-prompt-overlay" onClick={() => setShowInstallPrompt(false)}>
+          <div className="install-prompt-card" onClick={e => e.stopPropagation()}>
+            <div className="install-prompt-icon-container">
+              <div className="install-prompt-icon">
+                <Home size={38} />
+              </div>
+            </div>
+            
+            <div className="install-prompt-title">
+              <h3>Installa UniHub</h3>
+              <p>Aggiungi l'app alla schermata home per un'esperienza fluida e veloce.</p>
+            </div>
+            
+            <div className="install-steps">
+              <div className="install-step">
+                <div className="step-icon"><Share size={18} /></div>
+                <span>Tocca l'icona <strong>Condividi</strong> o i <strong>tre puntini</strong> in alto</span>
+              </div>
+              <div className="install-step">
+                <div className="step-icon"><PlusSquare size={18} /></div>
+                <span>Seleziona <strong>Aggiungi alla schermata Home</strong></span>
+              </div>
+            </div>
+
+            <button className="close-prompt-btn" onClick={() => setShowInstallPrompt(false)}>
+              Ho capito
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
