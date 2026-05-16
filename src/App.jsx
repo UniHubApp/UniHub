@@ -23,12 +23,9 @@ export default function App() {
       }
     });
 
-    // Show prompt after a short delay if on iOS and not standalone
+    // Show prompt immediately if on iOS and not standalone
     if (isIOS && !isStandalone) {
-      const timer = setTimeout(() => {
-        setShowInstallPrompt(true);
-      }, 2000);
-      return () => clearTimeout(timer);
+      setShowInstallPrompt(true);
     }
   }, []);
 
@@ -59,16 +56,6 @@ export default function App() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  if (isFirstLaunch) {
-    return (
-      <div className="app-container">
-        <div className="main-content">
-          <ProfileSetup onSave={saveProfile} />
-        </div>
-      </div>
-    );
-  }
-
   const renderView = () => {
     switch (currentView) {
       case 'home': return <HomeView profile={profile} credits={credits} />;
@@ -89,28 +76,36 @@ export default function App() {
         </div>
       )}
       
-      <header className="app-header">
-        <div>
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 700 }}>UniHub</h1>
-          <div style={{ fontSize: '0.8rem', opacity: 0.9 }}>{profile.university}</div>
-        </div>
-        <div className="credit-badge">
-          <Award size={18} color="#20B2AA" />
-          <span>{credits} CR</span>
-        </div>
-      </header>
+      {isFirstLaunch ? (
+        <main className="main-content">
+          <ProfileSetup onSave={saveProfile} />
+        </main>
+      ) : (
+        <>
+          <header className="app-header">
+            <div>
+              <h1 style={{ fontSize: '1.25rem', fontWeight: 700 }}>UniHub</h1>
+              <div style={{ fontSize: '0.8rem', opacity: 0.9 }}>{profile.university}</div>
+            </div>
+            <div className="credit-badge">
+              <Award size={18} color="#20B2AA" />
+              <span>{credits} CR</span>
+            </div>
+          </header>
 
-      <main className="main-content">
-        {renderView()}
-      </main>
+          <main className="main-content">
+            {renderView()}
+          </main>
 
-      <nav className="bottom-nav">
-        <NavItem icon={<Home />} label="Home" active={currentView === 'home'} onClick={() => setCurrentView('home')} />
-        <NavItem icon={<List />} label="Annunci" active={currentView === 'bacheca'} onClick={() => setCurrentView('bacheca')} />
-        <NavItem icon={<MapPin />} label="Mappa" active={currentView === 'mappa'} onClick={() => setCurrentView('mappa')} />
-        <NavItem icon={<Users />} label="Tutor" active={currentView === 'tutoring'} onClick={() => setCurrentView('tutoring')} />
-        <NavItem icon={<MessageCircle />} label="Chat" active={currentView === 'chat'} onClick={() => setCurrentView('chat')} />
-      </nav>
+          <nav className="bottom-nav">
+            <NavItem icon={<Home />} label="Home" active={currentView === 'home'} onClick={() => setCurrentView('home')} />
+            <NavItem icon={<List />} label="Annunci" active={currentView === 'bacheca'} onClick={() => setCurrentView('bacheca')} />
+            <NavItem icon={<MapPin />} label="Mappa" active={currentView === 'mappa'} onClick={() => setCurrentView('mappa')} />
+            <NavItem icon={<Users />} label="Tutor" active={currentView === 'tutoring'} onClick={() => setCurrentView('tutoring')} />
+            <NavItem icon={<MessageCircle />} label="Chat" active={currentView === 'chat'} onClick={() => setCurrentView('chat')} />
+          </nav>
+        </>
+      )}
 
       {showInstallPrompt && (
         <div className="install-prompt-overlay" onClick={() => setShowInstallPrompt(false)}>
@@ -129,7 +124,7 @@ export default function App() {
             <div className="install-steps">
               <div className="install-step">
                 <div className="step-icon"><Share size={18} /></div>
-                <span>Tocca l'icona <strong>Condividi</strong> o i <strong>tre puntini</strong> in alto</span>
+                <span>Tocca l'icona <strong>Condividi</strong> o i <strong>tre puntini</strong></span>
               </div>
               <div className="install-step">
                 <div className="step-icon"><PlusSquare size={18} /></div>
