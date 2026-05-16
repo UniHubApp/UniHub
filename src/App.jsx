@@ -255,25 +255,28 @@ const ProfileSetup = ({ onSave }) => {
 
       <div className="card">
         <form onSubmit={handleSubmit}>
-          <div className="photo-upload-wrapper">
-            {formData.photo ? (
-              <img src={formData.photo} alt="Profile" className="profile-avatar" />
-            ) : (
-              <div className="profile-avatar">
-                {formData.name ? formData.name[0].toUpperCase() : '?'}
+          {/* Foto Profilo */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <div className="photo-upload-wrapper" style={{ marginBottom: '0.5rem' }}>
+              {formData.photo ? (
+                <img src={formData.photo} alt="Profile" className="profile-avatar" style={{ marginBottom: 0 }} />
+              ) : (
+                <div className="profile-avatar" style={{ marginBottom: 0 }}>
+                  {formData.name ? formData.name[0].toUpperCase() : '?'}
+                </div>
+              )}
+              <div className="photo-upload-btn" onClick={() => fileInputRef.current.click()}>
+                <Camera size={16} />
               </div>
-            )}
-            <div className="photo-upload-btn" onClick={() => fileInputRef.current.click()}>
-              <Camera size={16} />
+              <input 
+                type="file" 
+                accept="image/*" 
+                className="photo-input" 
+                ref={fileInputRef} 
+                onChange={handlePhotoUpload} 
+              />
             </div>
-            <input 
-              type="file" 
-              accept="image/*" 
-              className="photo-input" 
-              ref={fileInputRef} 
-              onChange={handlePhotoUpload} 
-            />
-            <p className="text-muted" style={{ textAlign: 'center', fontSize: '0.7rem', marginTop: '0.5rem' }}>Foto (Facoltativa)</p>
+            <p className="text-muted" style={{ fontSize: '0.75rem' }}>Foto (Facoltativa)</p>
           </div>
 
           <div className="input-group">
@@ -282,17 +285,16 @@ const ProfileSetup = ({ onSave }) => {
               value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} />
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem' }}>
-            <div className="input-group" style={{ flex: 2 }}>
-              <label className="input-label">Università *</label>
-              <input required type="text" className="input-field" placeholder="Es. Università Cattolica del Sacro Cuore" 
-                value={formData.university} onChange={(e) => setFormData({...formData, university: e.target.value})} />
-            </div>
-            <div className="input-group" style={{ flex: 1 }}>
-              <label className="input-label">Città *</label>
-              <input required type="text" className="input-field" placeholder="Es. Milano" 
-                value={formData.city} onChange={(e) => setFormData({...formData, city: e.target.value})} />
-            </div>
+          <div className="input-group">
+            <label className="input-label">Università *</label>
+            <input required type="text" className="input-field" placeholder="Es. Università Cattolica del Sacro Cuore" 
+              value={formData.university} onChange={(e) => setFormData({...formData, university: e.target.value})} />
+          </div>
+
+          <div className="input-group">
+            <label className="input-label">Città *</label>
+            <input required type="text" className="input-field" placeholder="Es. Milano" 
+              value={formData.city} onChange={(e) => setFormData({...formData, city: e.target.value})} />
           </div>
 
           <div className="input-group">
@@ -302,16 +304,18 @@ const ProfileSetup = ({ onSave }) => {
           </div>
 
           <div className="input-group">
-            <label className="input-label">Corso di Laurea *</label>
-            <div className="input-row">
-              <select className="input-field" style={{ width: 'auto' }} value={formData.degreeType} 
-                onChange={(e) => setFormData({...formData, degreeType: e.target.value})}>
-                <option value="Triennale">Triennale</option>
-                <option value="Magistrale">Magistrale</option>
-              </select>
-              <input required type="text" className="input-field" placeholder="Es. Direzione e Consulenza aziendale" 
-                value={formData.degree} onChange={(e) => setFormData({...formData, degree: e.target.value})} />
-            </div>
+            <label className="input-label">Tipo di Laurea *</label>
+            <select className="input-field" value={formData.degreeType} 
+              onChange={(e) => setFormData({...formData, degreeType: e.target.value})}>
+              <option value="Triennale">Triennale</option>
+              <option value="Magistrale">Magistrale</option>
+            </select>
+          </div>
+
+          <div className="input-group">
+            <label className="input-label">Nome Corso di Laurea *</label>
+            <input required type="text" className="input-field" placeholder="Es. Direzione e Consulenza aziendale" 
+              value={formData.degree} onChange={(e) => setFormData({...formData, degree: e.target.value})} />
           </div>
           
           <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: '1.5rem 0' }} />
