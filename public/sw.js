@@ -1,11 +1,13 @@
-const CACHE_NAME = 'unihub-pwa-v1';
+const CACHE_NAME = 'unihub-pwa-v1.1.0';
 const urlsToCache = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './icon.svg'
 ];
 
 self.addEventListener('install', event => {
+  self.skipWaiting(); // Forza l'attivazione immediata
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -14,14 +16,22 @@ self.addEventListener('install', event => {
   );
 });
 
+self.addEventListener('activate', event => {
+  // Rimuove le vecchie cache
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
+      );
+    })
+  );
+});
+
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
+        return response || fetch(event.request);
       })
   );
 });
