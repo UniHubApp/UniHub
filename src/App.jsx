@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Home, List, MapPin, Users, MessageCircle, CheckCircle, Navigation, Award, BookOpen, Star, Send, Camera, Plus, Trash2, Share, PlusSquare } from 'lucide-react';
+import { Home, List, MapPin, Users, MessageCircle, CheckCircle, Navigation, Award, BookOpen, Star, Send, Camera, Plus, Trash2, Share, PlusSquare, Info, X } from 'lucide-react';
 
 export default function App() {
   const [profile, setProfile] = useState(null);
@@ -8,6 +8,8 @@ export default function App() {
   const [isFirstLaunch, setIsFirstLaunch] = useState(true);
   const [toast, setToast] = useState(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [showChangelog, setShowChangelog] = useState(false);
+  const APP_VERSION = "v1.1.0";
 
   useEffect(() => {
     // Check if it's iOS and not already installed
@@ -58,7 +60,7 @@ export default function App() {
 
   const renderView = () => {
     switch (currentView) {
-      case 'home': return <HomeView profile={profile} credits={credits} />;
+      case 'home': return <HomeView profile={profile} credits={credits} onShowInfo={() => setShowChangelog(true)} />;
       case 'bacheca': return <BachecaView showToast={showToast} profile={profile} />;
       case 'mappa': return <MappaView showToast={showToast} />;
       case 'tutoring': return <TutoringView credits={credits} showToast={showToast} />;
@@ -138,6 +140,44 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {showChangelog && (
+        <div className="modal-overlay" onClick={() => setShowChangelog(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 className="subtitle" style={{ margin: 0 }}>Cronologia Versioni</h2>
+              <button onClick={() => setShowChangelog(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className="changelog-item">
+              <div className="changelog-version">v1.1.0</div>
+              <div className="changelog-date">16 Maggio 2026</div>
+              <ul className="changelog-changes">
+                <li>Aggiunta gestione versioning e info app</li>
+                <li>Nuovi campi obbligatori nel profilo (Città, Tipo Laurea)</li>
+                <li>Migliorata validazione e legenda inserimento dati</li>
+                <li>Rimosso frame simulazione smartphone per desktop</li>
+                <li>Corretti percorsi per installazione PWA su sottocartelle</li>
+              </ul>
+            </div>
+
+            <div className="changelog-item">
+              <div className="changelog-version">v1.0.0</div>
+              <div className="changelog-date">12 Maggio 2026</div>
+              <ul className="changelog-changes">
+                <li>Rilascio iniziale prototipo UniHub</li>
+                <li>Configurazione PWA e Service Worker</li>
+                <li>Sistema crediti (Peer-Tutoring)</li>
+                <li>Mappa campus e Bacheca annunci</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <div className="version-tag">UniHub {APP_VERSION}</div>
     </div>
   );
 }
@@ -154,7 +194,9 @@ const ProfileSetup = ({ onSave }) => {
     name: '',
     university: '',
     department: '',
+    degreeType: 'Triennale',
     degree: '',
+    city: '',
     photo: null,
     exams: []
   });
@@ -192,21 +234,27 @@ const ProfileSetup = ({ onSave }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (formData.name && formData.university) {
+    if (formData.name && formData.university && formData.city && formData.degree) {
       onSave(formData);
     }
   };
 
   return (
-    <div className="container animate-fade-in" style={{ paddingTop: '2rem' }}>
+    <div className="container animate-fade-in" style={{ paddingTop: '2rem', maxWidth: '600px', margin: '0 auto' }}>
       <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
         <h1 className="title" style={{ fontSize: '1.75rem', marginBottom: '0.25rem' }}>Il tuo Profilo</h1>
         <p className="text-muted">Completa i dati per iniziare</p>
       </div>
 
+      <div className="info-legend">
+        <Info size={20} style={{ flexShrink: 0 }} />
+        <span>
+          Tutte le informazioni inserite devono corrispondere ai <strong>nomi completi ed esatti</strong> (es. nome università, dipartimento, corso ed esami).
+        </span>
+      </div>
+
       <div className="card">
         <form onSubmit={handleSubmit}>
-          {/* Foto Profilo */}
           <div className="photo-upload-wrapper">
             {formData.photo ? (
               <img src={formData.photo} alt="Profile" className="profile-avatar" />
@@ -225,6 +273,7 @@ const ProfileSetup = ({ onSave }) => {
               ref={fileInputRef} 
               onChange={handlePhotoUpload} 
             />
+            <p className="text-muted" style={{ textAlign: 'center', fontSize: '0.7rem', marginTop: '0.5rem' }}>Foto (Facoltativa)</p>
           </div>
 
           <div className="input-group">
@@ -232,20 +281,37 @@ const ProfileSetup = ({ onSave }) => {
             <input required type="text" className="input-field" placeholder="Es. Mario Rossi" 
               value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} />
           </div>
-          <div className="input-group">
-            <label className="input-label">Università *</label>
-            <input required type="text" className="input-field" placeholder="Es. Politecnico di Milano" 
-              value={formData.university} onChange={(e) => setFormData({...formData, university: e.target.value})} />
+
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <div className="input-group" style={{ flex: 2 }}>
+              <label className="input-label">Università *</label>
+              <input required type="text" className="input-field" placeholder="Es. Università Cattolica del Sacro Cuore" 
+                value={formData.university} onChange={(e) => setFormData({...formData, university: e.target.value})} />
+            </div>
+            <div className="input-group" style={{ flex: 1 }}>
+              <label className="input-label">Città *</label>
+              <input required type="text" className="input-field" placeholder="Es. Milano" 
+                value={formData.city} onChange={(e) => setFormData({...formData, city: e.target.value})} />
+            </div>
           </div>
+
           <div className="input-group">
-            <label className="input-label">Dipartimento (Facoltativo)</label>
-            <input type="text" className="input-field" placeholder="Es. Ingegneria dell'Informazione" 
+            <label className="input-label">Dipartimento *</label>
+            <input required type="text" className="input-field" placeholder="Es. Economia" 
               value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} />
           </div>
+
           <div className="input-group">
-            <label className="input-label">Corso di Laurea (Facoltativo)</label>
-            <input type="text" className="input-field" placeholder="Es. Ingegneria Informatica" 
-              value={formData.degree} onChange={(e) => setFormData({...formData, degree: e.target.value})} />
+            <label className="input-label">Corso di Laurea *</label>
+            <div className="input-row">
+              <select className="input-field" style={{ width: 'auto' }} value={formData.degreeType} 
+                onChange={(e) => setFormData({...formData, degreeType: e.target.value})}>
+                <option value="Triennale">Triennale</option>
+                <option value="Magistrale">Magistrale</option>
+              </select>
+              <input required type="text" className="input-field" placeholder="Es. Direzione e Consulenza aziendale" 
+                value={formData.degree} onChange={(e) => setFormData({...formData, degree: e.target.value})} />
+            </div>
           </div>
           
           <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: '1.5rem 0' }} />
@@ -294,16 +360,22 @@ const HomeView = ({ profile, credits }) => {
   return (
     <div className="container animate-fade-in">
       <div className="card" style={{ textAlign: 'center', paddingTop: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
           {profile.photo ? (
             <img src={profile.photo} alt={profile.name} className="profile-avatar" />
           ) : (
             <div className="profile-avatar">{initials}</div>
           )}
+          <button 
+            onClick={() => onShowInfo()}
+            style={{ position: 'absolute', right: '0', top: '0', background: 'none', border: 'none', color: 'var(--primary-navy)', cursor: 'pointer' }}
+          >
+            <Info size={24} />
+          </button>
         </div>
         <h2 className="title" style={{ marginBottom: '0.25rem' }}>{profile.name}</h2>
         <p className="text-muted" style={{ marginBottom: '1.5rem' }}>
-          {profile.degree || 'Studente'} • {profile.university}
+          {profile.degreeType} in {profile.degree} • {profile.university} ({profile.city})
         </p>
         
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
