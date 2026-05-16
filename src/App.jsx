@@ -357,7 +357,7 @@ const ProfileSetup = ({ onSave }) => {
   );
 };
 
-const HomeView = ({ profile, credits }) => {
+const HomeView = ({ profile, credits, onShowInfo }) => {
   const initials = profile.name ? profile.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : '?';
   const examsCount = profile.exams ? profile.exams.length : 0;
   
