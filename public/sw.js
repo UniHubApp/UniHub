@@ -17,12 +17,14 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  // Rimuove le vecchie cache
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.filter(name => name !== CACHE_NAME).map(name => caches.delete(name))
       );
+    }).then(() => {
+      // Forza il service worker a prendere il controllo di tutte le pagine aperte
+      return self.clients.claim();
     })
   );
 });
