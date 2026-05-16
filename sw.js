@@ -1,9 +1,9 @@
 const CACHE_NAME = 'unihub-pwa-v1.1.1';
 const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon.svg'
+  '/UniHub/',
+  '/UniHub/index.html',
+  '/UniHub/manifest.json',
+  '/UniHub/icon.svg'
 ];
 
 self.addEventListener('install', event => {

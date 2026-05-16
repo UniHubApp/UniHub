@@ -2,21 +2,21 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/UniHub/icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#ffffff" />
-    <link rel="manifest" href="./manifest.json" />
+    <link rel="manifest" href="/UniHub/manifest.json" />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <title>UniHub - PWA Prototype</title>
-    <script type="module" crossorigin src="./assets/index-9CoWbKs9.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BL6N8is1.css">
+    <script type="module" crossorigin src="/UniHub/assets/index-D_5o2odk.js"></script>
+    <link rel="stylesheet" crossorigin href="/UniHub/assets/index-BL6N8is1.css">
   </head>
   <body>
     <div id="root"></div>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js')
+          navigator.serviceWorker.register('/UniHub/sw.js')
             .then(reg => console.log('SW registered'))
             .catch(err => console.log('SW error', err));
         });
