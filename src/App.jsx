@@ -482,35 +482,34 @@ const HomeView = ({ profile, onShowInfo, onEditProfile }) => {
 
 const BachecaView = ({ showToast, profile }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState(null);
+  const [selectedAd, setSelectedAd] = useState(null);
   
   const ads = [
-    { id: 1, title: 'Gruppo di studio Analisi 1', subject: 'Matematica', author: 'Elena B.', type: 'Cerco', category: 'match' },
-    { id: 2, title: 'Ripetizioni di Fisica Tecnica', subject: 'Fisica', author: 'Luca V.', type: 'Offro', category: 'ripetizioni' },
-    { id: 3, title: 'Cerco compagno studio Programmazione Web', subject: 'Informatica', author: 'Giulia F.', type: 'Cerco', category: 'match' },
-    { id: 4, title: 'Ripetizioni Innovazioni e Metriche di Marketing', subject: 'Marketing', author: 'Marco T.', type: 'Offro', category: 'ripetizioni' },
-    { id: 5, title: 'Cerco compagno per studio Economia Aziendale', subject: 'Economia', author: 'Sara M.', type: 'Cerco', category: 'match' },
-    { id: 6, title: 'Cerco ripetizioni di Statistica', subject: 'Statistica', author: 'Anna R.', type: 'Cerco', category: 'ripetizioni' }
+    { id: 1, title: 'Cerco compagno di studio per Analisi Matematica 1', subject: 'Analisi Matematica 1', professor: 'Prof. Giovanni Bianchi', author: 'Elena B.', university: 'Università Cattolica del Sacro Cuore', degree: 'Economia e Gestione Aziendale', city: 'Milano', description: 'Cerco qualcuno con cui preparare l\'esame di Analisi 1 insieme. Disponibile in biblioteca o online.' },
+    { id: 2, title: 'Cerco compagno studio Programmazione Web', subject: 'Programmazione Web e Mobile', professor: 'Prof. Andrea Fumagalli', author: 'Giulia F.', university: 'Politecnico di Milano', degree: 'Ingegneria Informatica', city: 'Milano', description: 'Sto cercando qualcuno per lavorare insieme al progetto finale e prepararsi per l\'esame.' },
+    { id: 3, title: 'Cerco compagno per studio Economia Aziendale', subject: 'Economia Aziendale', professor: 'Prof.ssa Maria Conte', author: 'Sara M.', university: 'Università Cattolica del Sacro Cuore', degree: 'Economia', city: 'Milano', description: 'Vorrei trovare un gruppo per studiare insieme Economia Aziendale, ho tutti gli appunti delle lezioni.' },
+    { id: 4, title: 'Gruppo studio Innovazioni e Metriche di Marketing', subject: 'Innovazioni e Metriche di Marketing', professor: 'Prof. Luca Pellegrini', author: 'Marco T.', university: 'Università Cattolica del Sacro Cuore', degree: 'Direzione e Consulenza Aziendale', city: 'Milano', description: 'Cerco compagni per prepararsi all\'esame di Innovazioni e Metriche di Marketing. Preferibilmente in zona Largo Gemelli.' },
+    { id: 5, title: 'Cerco partner studio Diritto Commerciale', subject: 'Diritto Commerciale', professor: 'Prof.ssa Laura Rossi', author: 'Davide P.', university: 'Università degli Studi di Milano', degree: 'Giurisprudenza', city: 'Milano', description: 'Cerco qualcuno per ripasso intensivo prima dell\'appello. Disponibile tutti i pomeriggi.' }
   ];
 
-  const filteredAds = ads.filter(ad => {
-    const matchesSearch = searchQuery.trim() === '' ||
-      ad.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ad.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = activeFilter === null || ad.category === activeFilter;
-    return matchesSearch && matchesCategory;
-  });
+  const filteredAds = searchQuery.trim() === '' 
+    ? ads 
+    : ads.filter(ad => 
+        ad.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        ad.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        ad.professor.toLowerCase().includes(searchQuery.toLowerCase())
+      );
 
   return (
     <div className="container animate-fade-in">
-      <h2 className="title">Bacheca Annunci</h2>
-      <p className="text-muted" style={{ marginBottom: '1rem' }}>Annunci per {profile.university}</p>
+      <h2 className="title">Match di Studio</h2>
+      <p className="text-muted" style={{ marginBottom: '1rem' }}>Trova compagni di studio nella tua zona</p>
       
-      <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
+      <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
         <input 
           type="text" 
           className="input-field" 
-          placeholder="Cerca per materia o titolo..." 
+          placeholder="Cerca per materia, titolo o professore..." 
           value={searchQuery} 
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{ paddingLeft: '2.75rem', marginBottom: 0 }}
@@ -521,53 +520,64 @@ const BachecaView = ({ showToast, profile }) => {
         </svg>
       </div>
 
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
-        <button 
-          onClick={() => setActiveFilter(activeFilter === 'match' ? null : 'match')}
-          style={{ 
-            flex: 1, padding: '0.6rem 1rem', borderRadius: 'var(--radius-md)', fontWeight: 600, fontSize: '0.85rem', 
-            cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s ease',
-            background: activeFilter === 'match' ? 'var(--primary-navy)' : 'white', 
-            color: activeFilter === 'match' ? 'white' : 'var(--primary-navy)', 
-            border: '2px solid var(--primary-navy)' 
-          }}
-        >
-          Match Studio
-        </button>
-        <button 
-          onClick={() => setActiveFilter(activeFilter === 'ripetizioni' ? null : 'ripetizioni')}
-          style={{ 
-            flex: 1, padding: '0.6rem 1rem', borderRadius: 'var(--radius-md)', fontWeight: 600, fontSize: '0.85rem', 
-            cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s ease',
-            background: activeFilter === 'ripetizioni' ? 'var(--accent-aqua)' : 'white', 
-            color: activeFilter === 'ripetizioni' ? 'white' : 'var(--accent-aqua)', 
-            border: '2px solid var(--accent-aqua)' 
-          }}
-        >
-          Ripetizioni
-        </button>
-      </div>
-
       {filteredAds.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
           <p className="text-muted">Nessun annuncio trovato{searchQuery ? ` per "${searchQuery}"` : ''}</p>
         </div>
       ) : (
         filteredAds.map(ad => (
-          <div key={ad.id} className="card">
+          <div key={ad.id} className="card" style={{ cursor: 'pointer' }} onClick={() => setSelectedAd(ad)}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-              <span className="badge" style={{ background: ad.type === 'Cerco' ? '#FFFBEB' : '#ECFDF5', color: ad.type === 'Cerco' ? '#D97706' : '#059669' }}>
-                {ad.type}
-              </span>
+              <span className="badge" style={{ background: 'rgba(236, 72, 153, 0.1)', color: '#EC4899' }}>Match Studio</span>
               <span className="badge">{ad.subject}</span>
             </div>
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>{ad.title}</h3>
-            <p className="text-muted" style={{ marginBottom: '1rem' }}>Pubblicato da {ad.author}</p>
-            <button className="btn btn-outline" style={{ padding: '0.5rem', fontSize: '0.9rem' }} onClick={() => showToast('Richiesta inviata con successo!')}>
-              Invia Richiesta
-            </button>
+            <h3 style={{ fontSize: '1rem', marginBottom: '0.25rem' }}>{ad.title}</h3>
+            <p className="text-muted" style={{ fontSize: '0.85rem' }}>Pubblicato da {ad.author} • {ad.city}</p>
           </div>
         ))
+      )}
+
+      {selectedAd && (
+        <div className="modal-overlay" onClick={() => setSelectedAd(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 className="subtitle" style={{ margin: 0 }}>Dettaglio Annuncio</h2>
+              <button onClick={() => setSelectedAd(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <X size={24} />
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', paddingBottom: '1.25rem', borderBottom: '1px solid var(--border-color)' }}>
+              <div className="profile-avatar" style={{ width: '48px', height: '48px', fontSize: '1rem' }}>
+                {selectedAd.author.split(' ').map(n => n[0]).join('')}
+              </div>
+              <div>
+                <div style={{ fontWeight: 700 }}>{selectedAd.author}</div>
+                <div className="text-muted" style={{ fontSize: '0.8rem' }}>{selectedAd.university}</div>
+                <div className="text-muted" style={{ fontSize: '0.8rem' }}>{selectedAd.degree} • {selectedAd.city}</div>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '1.25rem' }}>
+              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '0.35rem' }}>Materia</div>
+              <div style={{ fontWeight: 600, fontSize: '1rem' }}>{selectedAd.subject}</div>
+            </div>
+
+            <div style={{ marginBottom: '1.25rem' }}>
+              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '0.35rem' }}>Professore</div>
+              <div style={{ fontWeight: 600, fontSize: '1rem' }}>{selectedAd.professor}</div>
+            </div>
+
+            <div style={{ marginBottom: '1.5rem' }}>
+              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '0.35rem' }}>Descrizione</div>
+              <p style={{ fontSize: '0.9rem', lineHeight: 1.6, color: 'var(--text-color)' }}>{selectedAd.description}</p>
+            </div>
+
+            <button className="btn btn-primary" onClick={() => { setSelectedAd(null); showToast('Richiesta di match inviata a ' + selectedAd.author + '!'); }}>
+              Invia Richiesta di Match
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
