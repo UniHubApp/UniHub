@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Home, List, MapPin, Users, MessageCircle, CheckCircle, Navigation, Award, BookOpen, Star, Send, Camera, Plus, Trash2, Share, PlusSquare, Info, X } from 'lucide-react';
+import { Home, List, Users, MessageCircle, CheckCircle, Navigation, Award, BookOpen, Star, Send, Camera, Plus, Trash2, Share, PlusSquare, Info, X } from 'lucide-react';
 
 export default function App() {
   const [profile, setProfile] = useState(null);
@@ -9,6 +9,7 @@ export default function App() {
   const [toast, setToast] = useState(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
   const APP_VERSION = "v1.1.0";
 
   useEffect(() => {
@@ -51,6 +52,7 @@ export default function App() {
     localStorage.setItem('unihub_profile', JSON.stringify(newProfile));
     setProfile(newProfile);
     setIsFirstLaunch(false);
+    setIsEditingProfile(false);
   };
 
   const showToast = (message) => {
@@ -59,13 +61,16 @@ export default function App() {
   };
 
   const renderView = () => {
+    if (isEditingProfile) {
+      return <ProfileSetup onSave={saveProfile} initialData={profile} />;
+    }
+    
     switch (currentView) {
-      case 'home': return <HomeView profile={profile} credits={credits} onShowInfo={() => setShowChangelog(true)} />;
+      case 'home': return <HomeView profile={profile} onShowInfo={() => setShowChangelog(true)} onEditProfile={() => setIsEditingProfile(true)} />;
       case 'bacheca': return <BachecaView showToast={showToast} profile={profile} />;
-      case 'mappa': return <MappaView showToast={showToast} />;
       case 'tutoring': return <TutoringView credits={credits} showToast={showToast} />;
       case 'chat': return <ChatView />;
-      default: return <HomeView profile={profile} credits={credits} />;
+      default: return <HomeView profile={profile} onShowInfo={() => setShowChangelog(true)} onEditProfile={() => setIsEditingProfile(true)} />;
     }
   };
 
@@ -89,10 +94,6 @@ export default function App() {
               <h1 style={{ fontSize: '1.25rem', fontWeight: 700 }}>UniHub</h1>
               <div style={{ fontSize: '0.8rem', opacity: 0.9 }}>{profile.university}</div>
             </div>
-            <div className="credit-badge">
-              <Award size={18} color="#20B2AA" />
-              <span>{credits} CR</span>
-            </div>
           </header>
 
           <main className="main-content">
@@ -102,7 +103,6 @@ export default function App() {
           <nav className="bottom-nav">
             <NavItem icon={<Home />} label="Home" active={currentView === 'home'} onClick={() => setCurrentView('home')} />
             <NavItem icon={<List />} label="Annunci" active={currentView === 'bacheca'} onClick={() => setCurrentView('bacheca')} />
-            <NavItem icon={<MapPin />} label="Mappa" active={currentView === 'mappa'} onClick={() => setCurrentView('mappa')} />
             <NavItem icon={<Users />} label="Tutor" active={currentView === 'tutoring'} onClick={() => setCurrentView('tutoring')} />
             <NavItem icon={<MessageCircle />} label="Chat" active={currentView === 'chat'} onClick={() => setCurrentView('chat')} />
           </nav>
@@ -189,8 +189,8 @@ const NavItem = ({ icon, label, active, onClick }) => (
   </button>
 );
 
-const ProfileSetup = ({ onSave }) => {
-  const [formData, setFormData] = useState({
+const ProfileSetup = ({ onSave, initialData }) => {
+  const [formData, setFormData] = useState(initialData || {
     name: '',
     university: '',
     department: '',
@@ -357,9 +357,9 @@ const ProfileSetup = ({ onSave }) => {
   );
 };
 
-const HomeView = ({ profile, credits, onShowInfo }) => {
+const HomeView = ({ profile, onShowInfo, onEditProfile }) => {
+  const [showExamsModal, setShowExamsModal] = useState(false);
   const initials = profile.name ? profile.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : '?';
-  const examsCount = profile.exams ? profile.exams.length : 0;
   
   return (
     <div className="container animate-fade-in">
@@ -378,34 +378,55 @@ const HomeView = ({ profile, credits, onShowInfo }) => {
           </button>
         </div>
         <h2 className="title" style={{ marginBottom: '0.25rem' }}>{profile.name}</h2>
-        <p className="text-muted" style={{ marginBottom: '1.5rem' }}>
+        <p className="text-muted" style={{ marginBottom: '0.5rem' }}>
           {profile.degreeType} in {profile.degree} • {profile.university} ({profile.city})
         </p>
         
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-          <div style={{ background: 'var(--bg-color)', padding: '1rem', borderRadius: 'var(--radius-md)', flex: 1 }}>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--primary-navy)' }}>{credits}</div>
-            <div className="text-muted" style={{ fontSize: '0.8rem' }}>Crediti Disp.</div>
-          </div>
-          <div style={{ background: 'var(--bg-color)', padding: '1rem', borderRadius: 'var(--radius-md)', flex: 1 }}>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--primary-navy)' }}>{examsCount}</div>
-            <div className="text-muted" style={{ fontSize: '0.8rem' }}>Esami Dati</div>
-          </div>
+        <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
+          <button className="btn btn-outline" style={{ width: 'auto', fontSize: '0.85rem', padding: '0.4rem 1.5rem', borderRadius: '9999px' }} onClick={onEditProfile}>
+            Modifica Profilo
+          </button>
         </div>
       </div>
 
       {profile.exams && profile.exams.length > 0 && (
         <>
-          <h3 className="subtitle" style={{ marginBottom: '1rem', marginTop: '1.5rem' }}>Libretto (Ultimi Esami)</h3>
-          <div className="card">
-            {profile.exams.slice(-3).reverse().map(exam => (
-              <div key={exam.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 0', borderBottom: '1px solid var(--border-color)' }}>
-                <div style={{ fontWeight: 600 }}>{exam.name}</div>
-                <div className="badge">{exam.grade === '31' ? '30L' : exam.grade}/30</div>
+          <h3 className="subtitle" style={{ marginBottom: '1rem', marginTop: '1.5rem' }}>I tuoi Esami</h3>
+          <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onClick={() => setShowExamsModal(true)}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ background: '#E0F2FE', padding: '0.75rem', borderRadius: '50%', color: 'var(--primary-navy)' }}>
+                <BookOpen size={24} />
               </div>
-            ))}
+              <div style={{ fontWeight: 600 }}>Esami Sostenuti ({profile.exams.length})</div>
+            </div>
+            <div className="badge" style={{ cursor: 'pointer' }}>Vedi tutti</div>
           </div>
         </>
+      )}
+
+      {showExamsModal && (
+        <div className="modal-overlay" onClick={() => setShowExamsModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 className="subtitle" style={{ margin: 0 }}>I tuoi Esami</h2>
+              <button onClick={() => setShowExamsModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <X size={24} />
+              </button>
+            </div>
+            {profile.exams.length === 0 ? (
+              <p className="text-muted" style={{ textAlign: 'center' }}>Nessun esame inserito.</p>
+            ) : (
+              <div>
+                {profile.exams.map(exam => (
+                  <div key={exam.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 0', borderBottom: '1px solid var(--border-color)' }}>
+                    <div style={{ fontWeight: 600 }}>{exam.name}</div>
+                    <div className="badge">{exam.grade === '31' ? '30L' : exam.grade}/30</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       <h3 className="subtitle" style={{ marginBottom: '1rem', marginTop: '1.5rem' }}>Le tue attività</h3>
@@ -420,12 +441,12 @@ const HomeView = ({ profile, credits, onShowInfo }) => {
       </div>
       
       <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <div style={{ background: 'rgba(32, 178, 170, 0.1)', padding: '0.75rem', borderRadius: '50%', color: 'var(--accent-aqua)', flexShrink: 0 }}>
-          <MapPin size={24} />
+        <div style={{ background: 'rgba(236, 72, 153, 0.1)', padding: '0.75rem', borderRadius: '50%', color: '#EC4899', flexShrink: 0 }}>
+          <Users size={24} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Prenotazione Aula Studio</div>
-          <div className="text-muted" style={{ fontSize: '0.8rem' }}>Biblioteca Centrale • Oggi, 16:30</div>
+          <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Match di Studio</div>
+          <div className="text-muted" style={{ fontSize: '0.8rem' }}>Con Giulia F. • Domani, 10:00</div>
         </div>
       </div>
       
@@ -479,58 +500,6 @@ const BachecaView = ({ showToast, profile }) => {
   );
 };
 
-const MappaView = ({ showToast }) => {
-  const places = [
-    { id: 1, name: 'Bar del Politecnico', address: 'Piazza Leonardo da Vinci, 32', slots: 5 },
-    { id: 2, name: 'Caffè Letterario', address: 'Via Pascoli, 12', slots: 2 },
-    { id: 3, name: 'Biblioteca Campus', address: 'Edificio 14', slots: 12 }
-  ];
-
-  return (
-    <div className="container animate-fade-in" style={{ padding: 0 }}>
-      {/* Mock Map Image */}
-      <div style={{ height: '250px', background: '#E2E8F0', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, 
-          backgroundImage: 'radial-gradient(#CBD5E1 1px, transparent 1px)', backgroundSize: '20px 20px', opacity: 0.5 }}></div>
-        <div style={{ position: 'absolute', top: '40%', left: '30%', color: 'var(--primary-navy)', transform: 'translate(-50%, -50%)' }}>
-          <MapPin size={32} fill="white" />
-        </div>
-        <div style={{ position: 'absolute', top: '60%', left: '70%', color: 'var(--accent-aqua)', transform: 'translate(-50%, -50%)' }}>
-          <MapPin size={32} fill="white" />
-        </div>
-        <div style={{ position: 'absolute', bottom: '1rem', right: '1rem', background: 'white', padding: '0.5rem', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)' }}>
-          <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>Mappa Campus</span>
-        </div>
-      </div>
-
-      <div style={{ padding: '1.5rem' }}>
-        <h2 className="title">Locali Convenzionati</h2>
-        <p className="text-muted" style={{ marginBottom: '1.5rem' }}>Trova un posto dove studiare in tranquillità.</p>
-
-        {places.map(place => (
-          <div key={place.id} className="card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div>
-                <h3 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>{place.name}</h3>
-                <p className="text-muted" style={{ marginBottom: '1rem', fontSize: '0.85rem' }}>
-                  <Navigation size={12} style={{ display: 'inline', marginRight: '4px' }} />
-                  {place.address}
-                </p>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: 700, color: 'var(--accent-aqua)' }}>{place.slots}</div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>posti liberi</div>
-              </div>
-            </div>
-            <button className="btn btn-primary" onClick={() => showToast(`Posto prenotato al ${place.name}!`)}>
-              Prenota Posto
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 const TutoringView = ({ credits, showToast }) => {
   const tutors = [

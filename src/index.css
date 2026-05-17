@@ -52,7 +52,7 @@ body {
 .main-content {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 2rem;
+  padding-bottom: 90px;
 }
 
 /* Utilities */
@@ -225,7 +225,10 @@ body {
   padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
   z-index: 1000;
   box-shadow: 0 -4px 10px rgba(0,0,0,0.03);
-  flex-shrink: 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 .nav-item {
