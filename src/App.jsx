@@ -481,39 +481,64 @@ const HomeView = ({ profile, onShowInfo, onEditProfile }) => {
 };
 
 const BachecaView = ({ showToast, profile }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  
   const ads = [
     { id: 1, title: 'Gruppo di studio Analisi 1', subject: 'Matematica', author: 'Elena B.', type: 'Cerco' },
     { id: 2, title: 'Appunti Fisica Tecnica', subject: 'Fisica', author: 'Luca V.', type: 'Offro' },
-    { id: 3, title: 'Progetto di Programmazione Web', subject: 'Informatica', author: 'Giulia F.', type: 'Cerco' }
+    { id: 3, title: 'Progetto di Programmazione Web', subject: 'Informatica', author: 'Giulia F.', type: 'Cerco' },
+    { id: 4, title: 'Ripetizioni Innovazioni Metriche di Marketing', subject: 'Marketing', author: 'Marco T.', type: 'Offro' },
+    { id: 5, title: 'Cerco compagno per studio Economia Aziendale', subject: 'Economia', author: 'Sara M.', type: 'Cerco' }
   ];
+
+  const filteredAds = searchQuery.trim() === '' 
+    ? ads 
+    : ads.filter(ad => 
+        ad.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        ad.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
 
   return (
     <div className="container animate-fade-in">
       <h2 className="title">Bacheca Annunci</h2>
-      <p className="text-muted" style={{ marginBottom: '1.5rem' }}>Annunci per {profile.university}</p>
+      <p className="text-muted" style={{ marginBottom: '1rem' }}>Annunci per {profile.university}</p>
       
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'none' }}>
-        <span className="badge" style={{ background: 'var(--primary-navy)', color: 'white', flexShrink: 0 }}>Tutti</span>
-        <span className="badge" style={{ flexShrink: 0 }}>Matematica</span>
-        <span className="badge" style={{ flexShrink: 0 }}>Fisica</span>
-        <span className="badge" style={{ flexShrink: 0 }}>Informatica</span>
+      <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
+        <input 
+          type="text" 
+          className="input-field" 
+          placeholder="Cerca per materia o titolo..." 
+          value={searchQuery} 
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{ paddingLeft: '2.75rem', marginBottom: 0 }}
+        />
+        <svg style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
       </div>
 
-      {ads.map(ad => (
-        <div key={ad.id} className="card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-            <span className="badge" style={{ background: ad.type === 'Cerco' ? '#FFFBEB' : '#ECFDF5', color: ad.type === 'Cerco' ? '#D97706' : '#059669' }}>
-              {ad.type}
-            </span>
-            <span className="text-muted" style={{ fontSize: '0.8rem' }}>{ad.subject}</span>
-          </div>
-          <h3 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>{ad.title}</h3>
-          <p className="text-muted" style={{ marginBottom: '1rem' }}>Pubblicato da {ad.author}</p>
-          <button className="btn btn-outline" style={{ padding: '0.5rem', fontSize: '0.9rem' }} onClick={() => showToast('Richiesta inviata con successo!')}>
-            Invia Richiesta
-          </button>
+      {filteredAds.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
+          <p className="text-muted">Nessun annuncio trovato per "{searchQuery}"</p>
         </div>
-      ))}
+      ) : (
+        filteredAds.map(ad => (
+          <div key={ad.id} className="card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+              <span className="badge" style={{ background: ad.type === 'Cerco' ? '#FFFBEB' : '#ECFDF5', color: ad.type === 'Cerco' ? '#D97706' : '#059669' }}>
+                {ad.type}
+              </span>
+              <span className="badge">{ad.subject}</span>
+            </div>
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>{ad.title}</h3>
+            <p className="text-muted" style={{ marginBottom: '1rem' }}>Pubblicato da {ad.author}</p>
+            <button className="btn btn-outline" style={{ padding: '0.5rem', fontSize: '0.9rem' }} onClick={() => showToast('Richiesta inviata con successo!')}>
+              Invia Richiesta
+            </button>
+          </div>
+        ))
+      )}
     </div>
   );
 };
