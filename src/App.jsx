@@ -484,12 +484,11 @@ const BachecaView = ({ showToast, profile }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAd, setSelectedAd] = useState(null);
   
+  // Gli annunci vengono filtrati automaticamente in base a università e corso dell'utente
   const ads = [
-    { id: 1, title: 'Cerco compagno di studio per Analisi Matematica 1', subject: 'Analisi Matematica 1', professor: 'Prof. Giovanni Bianchi', author: 'Elena B.', university: 'Università Cattolica del Sacro Cuore', degree: 'Economia e Gestione Aziendale', city: 'Milano', description: 'Cerco qualcuno con cui preparare l\'esame di Analisi 1 insieme. Disponibile in biblioteca o online.' },
-    { id: 2, title: 'Cerco compagno studio Programmazione Web', subject: 'Programmazione Web e Mobile', professor: 'Prof. Andrea Fumagalli', author: 'Giulia F.', university: 'Politecnico di Milano', degree: 'Ingegneria Informatica', city: 'Milano', description: 'Sto cercando qualcuno per lavorare insieme al progetto finale e prepararsi per l\'esame.' },
-    { id: 3, title: 'Cerco compagno per studio Economia Aziendale', subject: 'Economia Aziendale', professor: 'Prof.ssa Maria Conte', author: 'Sara M.', university: 'Università Cattolica del Sacro Cuore', degree: 'Economia', city: 'Milano', description: 'Vorrei trovare un gruppo per studiare insieme Economia Aziendale, ho tutti gli appunti delle lezioni.' },
-    { id: 4, title: 'Gruppo studio Innovazioni e Metriche di Marketing', subject: 'Innovazioni e Metriche di Marketing', professor: 'Prof. Luca Pellegrini', author: 'Marco T.', university: 'Università Cattolica del Sacro Cuore', degree: 'Direzione e Consulenza Aziendale', city: 'Milano', description: 'Cerco compagni per prepararsi all\'esame di Innovazioni e Metriche di Marketing. Preferibilmente in zona Largo Gemelli.' },
-    { id: 5, title: 'Cerco partner studio Diritto Commerciale', subject: 'Diritto Commerciale', professor: 'Prof.ssa Laura Rossi', author: 'Davide P.', university: 'Università degli Studi di Milano', degree: 'Giurisprudenza', city: 'Milano', description: 'Cerco qualcuno per ripasso intensivo prima dell\'appello. Disponibile tutti i pomeriggi.' }
+    { id: 1, title: 'Cerco compagno di studio per Innovazioni e Metriche di Marketing', subject: 'Innovazioni e Metriche di Marketing', professor: 'Prof. Luca Pellegrini', author: 'Marco T.', university: profile.university, degree: profile.degree, city: profile.city, description: 'Cerco compagni per prepararsi all\'esame di Innovazioni e Metriche di Marketing. Preferibilmente in zona Largo Gemelli, disponibile anche online.' },
+    { id: 2, title: 'Gruppo studio Economia e Gestione delle Imprese', subject: 'Economia e Gestione delle Imprese', professor: 'Prof.ssa Chiara Mauri', author: 'Giulia F.', university: profile.university, degree: profile.degree, city: profile.city, description: 'Sto cercando qualcuno per ripassare insieme i casi aziendali e prepararsi alle domande aperte dell\'esame.' },
+    { id: 3, title: 'Cerco partner di studio per Strategia Aziendale', subject: 'Strategia Aziendale', professor: 'Prof. Roberto Vaccà', author: 'Luca V.', university: profile.university, degree: profile.degree, city: profile.city, description: 'Vorrei formare un piccolo gruppo di studio per prepararsi al prossimo appello. Ho tutti gli appunti e le slide del professore.' }
   ];
 
   const filteredAds = searchQuery.trim() === '' 
@@ -503,13 +502,14 @@ const BachecaView = ({ showToast, profile }) => {
   return (
     <div className="container animate-fade-in">
       <h2 className="title">Match di Studio</h2>
-      <p className="text-muted" style={{ marginBottom: '1rem' }}>Trova compagni di studio nella tua zona</p>
+      <p className="text-muted" style={{ marginBottom: '0.25rem' }}>Compagni di studio del tuo corso</p>
+      <p className="text-muted" style={{ marginBottom: '1rem', fontSize: '0.8rem', fontStyle: 'italic' }}>{profile.degree} • {profile.university}</p>
       
       <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
         <input 
           type="text" 
           className="input-field" 
-          placeholder="Cerca per materia, titolo o professore..." 
+          placeholder="Cerca per materia o professore..." 
           value={searchQuery} 
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{ paddingLeft: '2.75rem', marginBottom: 0 }}
@@ -527,12 +527,9 @@ const BachecaView = ({ showToast, profile }) => {
       ) : (
         filteredAds.map(ad => (
           <div key={ad.id} className="card" style={{ cursor: 'pointer' }} onClick={() => setSelectedAd(ad)}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-              <span className="badge" style={{ background: 'rgba(236, 72, 153, 0.1)', color: '#EC4899' }}>Match Studio</span>
-              <span className="badge">{ad.subject}</span>
-            </div>
+            <span className="badge" style={{ marginBottom: '0.5rem' }}>{ad.subject}</span>
             <h3 style={{ fontSize: '1rem', marginBottom: '0.25rem' }}>{ad.title}</h3>
-            <p className="text-muted" style={{ fontSize: '0.85rem' }}>Pubblicato da {ad.author} • {ad.city}</p>
+            <p className="text-muted" style={{ fontSize: '0.85rem' }}>Pubblicato da {ad.author}</p>
           </div>
         ))
       )}
