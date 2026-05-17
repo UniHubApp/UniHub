@@ -34,18 +34,15 @@ export default function App() {
 
   useEffect(() => {
     const savedProfile = localStorage.getItem('unihub_profile');
-    const savedCredits = localStorage.getItem('unihub_credits');
     
     if (savedProfile) {
       setProfile(JSON.parse(savedProfile));
       setIsFirstLaunch(false);
     }
     
-    if (savedCredits) {
-      setCredits(parseInt(savedCredits, 10));
-    } else {
-      localStorage.setItem('unihub_credits', '2');
-    }
+    // Forza sempre 2 crediti per il prototipo
+    localStorage.setItem('unihub_credits', '2');
+    setCredits(2);
   }, []);
 
   const saveProfile = (newProfile) => {
@@ -452,8 +449,12 @@ const HomeView = ({ profile, onShowInfo, onEditProfile }) => {
           <BookOpen size={24} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Innovazioni Metriche di Marketing</div>
-          <div className="text-muted" style={{ fontSize: '0.8rem' }}>Con Luigi Verdi • Domani, 15:00</div>
+          <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '0.25rem' }}>Ripetizioni</div>
+          <div className="text-muted" style={{ fontSize: '0.8rem', lineHeight: 1.5 }}>
+            Innovazioni Metriche di Marketing<br/>
+            Con Luigi Verdi<br/>
+            Domani, 15:00
+          </div>
         </div>
       </div>
       
