@@ -4,35 +4,44 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#1C355E" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="UniHub">
     <link rel="manifest" href="/manifest.json" />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <title>UniHub - PWA Prototype</title>
   </head>
   <body>
     <div id="root"></div>
-    <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
-    <script>
-      // Init vConsole per debug mobile
-      var vConsole = new window.VConsole();
-    </script>
     <script type="module" src="/src/main.jsx"></script>
     <script>
+      // First: unregister old broken service workers and clear stale caches
       if ('serviceWorker' in navigator) {
-        // Unregister all service workers and clear caches to fix iOS white screen issue
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
-          for(let registration of registrations) {
-            registration.unregister();
+          for(var i = 0; i < registrations.length; i++) {
+            registrations[i].unregister();
           }
         });
         if (window.caches) {
           caches.keys().then(function(names) {
-            for (let name of names) {
-              caches.delete(name);
+            for (var i = 0; i < names.length; i++) {
+              caches.delete(names[i]);
             }
           });
         }
       }
+
+      // Then: register the new network-first service worker after page load
+      window.addEventListener('load', function() {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('./sw.js').then(function(reg) {
+            console.log('SW registered', reg.scope);
+          }).catch(function(err) {
+            console.log('SW registration failed', err);
+          });
+        }
+      });
     </script>
   </body>
 </html>
