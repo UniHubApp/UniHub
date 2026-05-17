@@ -451,7 +451,7 @@ const HomeView = ({ profile, onShowInfo, onEditProfile }) => {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '0.25rem' }}>Ripetizioni</div>
           <div className="text-muted" style={{ fontSize: '0.8rem', lineHeight: 1.5 }}>
-            Innovazioni Metriche di Marketing<br/>
+            Innovazioni e Metriche di Marketing<br/>
             Con Luigi Verdi<br/>
             Domani, 15:00
           </div>
@@ -464,7 +464,7 @@ const HomeView = ({ profile, onShowInfo, onEditProfile }) => {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Match di Studio</div>
-          <div className="text-muted" style={{ fontSize: '0.8rem' }}>Innovazioni Metriche di Marketing • Con Giulia F.</div>
+          <div className="text-muted" style={{ fontSize: '0.8rem' }}>Innovazioni e Metriche di Marketing • Con Giulia F.</div>
         </div>
       </div>
       
@@ -487,7 +487,7 @@ const BachecaView = ({ showToast, profile }) => {
     { id: 1, title: 'Gruppo di studio Analisi 1', subject: 'Matematica', author: 'Elena B.', type: 'Cerco' },
     { id: 2, title: 'Appunti Fisica Tecnica', subject: 'Fisica', author: 'Luca V.', type: 'Offro' },
     { id: 3, title: 'Progetto di Programmazione Web', subject: 'Informatica', author: 'Giulia F.', type: 'Cerco' },
-    { id: 4, title: 'Ripetizioni Innovazioni Metriche di Marketing', subject: 'Marketing', author: 'Marco T.', type: 'Offro' },
+    { id: 4, title: 'Ripetizioni Innovazioni e Metriche di Marketing', subject: 'Marketing', author: 'Marco T.', type: 'Offro' },
     { id: 5, title: 'Cerco compagno per studio Economia Aziendale', subject: 'Economia', author: 'Sara M.', type: 'Cerco' }
   ];
 
