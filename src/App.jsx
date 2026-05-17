@@ -482,28 +482,31 @@ const HomeView = ({ profile, onShowInfo, onEditProfile }) => {
 
 const BachecaView = ({ showToast, profile }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState(null);
   
   const ads = [
-    { id: 1, title: 'Gruppo di studio Analisi 1', subject: 'Matematica', author: 'Elena B.', type: 'Cerco' },
-    { id: 2, title: 'Appunti Fisica Tecnica', subject: 'Fisica', author: 'Luca V.', type: 'Offro' },
-    { id: 3, title: 'Progetto di Programmazione Web', subject: 'Informatica', author: 'Giulia F.', type: 'Cerco' },
-    { id: 4, title: 'Ripetizioni Innovazioni e Metriche di Marketing', subject: 'Marketing', author: 'Marco T.', type: 'Offro' },
-    { id: 5, title: 'Cerco compagno per studio Economia Aziendale', subject: 'Economia', author: 'Sara M.', type: 'Cerco' }
+    { id: 1, title: 'Gruppo di studio Analisi 1', subject: 'Matematica', author: 'Elena B.', type: 'Cerco', category: 'match' },
+    { id: 2, title: 'Ripetizioni di Fisica Tecnica', subject: 'Fisica', author: 'Luca V.', type: 'Offro', category: 'ripetizioni' },
+    { id: 3, title: 'Cerco compagno studio Programmazione Web', subject: 'Informatica', author: 'Giulia F.', type: 'Cerco', category: 'match' },
+    { id: 4, title: 'Ripetizioni Innovazioni e Metriche di Marketing', subject: 'Marketing', author: 'Marco T.', type: 'Offro', category: 'ripetizioni' },
+    { id: 5, title: 'Cerco compagno per studio Economia Aziendale', subject: 'Economia', author: 'Sara M.', type: 'Cerco', category: 'match' },
+    { id: 6, title: 'Cerco ripetizioni di Statistica', subject: 'Statistica', author: 'Anna R.', type: 'Cerco', category: 'ripetizioni' }
   ];
 
-  const filteredAds = searchQuery.trim() === '' 
-    ? ads 
-    : ads.filter(ad => 
-        ad.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        ad.title.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+  const filteredAds = ads.filter(ad => {
+    const matchesSearch = searchQuery.trim() === '' ||
+      ad.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ad.title.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = activeFilter === null || ad.category === activeFilter;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <div className="container animate-fade-in">
       <h2 className="title">Bacheca Annunci</h2>
       <p className="text-muted" style={{ marginBottom: '1rem' }}>Annunci per {profile.university}</p>
       
-      <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
+      <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
         <input 
           type="text" 
           className="input-field" 
@@ -518,9 +521,36 @@ const BachecaView = ({ showToast, profile }) => {
         </svg>
       </div>
 
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+        <button 
+          onClick={() => setActiveFilter(activeFilter === 'match' ? null : 'match')}
+          style={{ 
+            flex: 1, padding: '0.6rem 1rem', borderRadius: 'var(--radius-md)', fontWeight: 600, fontSize: '0.85rem', 
+            cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s ease',
+            background: activeFilter === 'match' ? 'var(--primary-navy)' : 'white', 
+            color: activeFilter === 'match' ? 'white' : 'var(--primary-navy)', 
+            border: '2px solid var(--primary-navy)' 
+          }}
+        >
+          Match Studio
+        </button>
+        <button 
+          onClick={() => setActiveFilter(activeFilter === 'ripetizioni' ? null : 'ripetizioni')}
+          style={{ 
+            flex: 1, padding: '0.6rem 1rem', borderRadius: 'var(--radius-md)', fontWeight: 600, fontSize: '0.85rem', 
+            cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s ease',
+            background: activeFilter === 'ripetizioni' ? 'var(--accent-aqua)' : 'white', 
+            color: activeFilter === 'ripetizioni' ? 'white' : 'var(--accent-aqua)', 
+            border: '2px solid var(--accent-aqua)' 
+          }}
+        >
+          Ripetizioni
+        </button>
+      </div>
+
       {filteredAds.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
-          <p className="text-muted">Nessun annuncio trovato per "{searchQuery}"</p>
+          <p className="text-muted">Nessun annuncio trovato{searchQuery ? ` per "${searchQuery}"` : ''}</p>
         </div>
       ) : (
         filteredAds.map(ad => (
