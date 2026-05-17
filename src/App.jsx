@@ -3,14 +3,14 @@ import { Home, List, Users, MessageCircle, CheckCircle, Navigation, Award, BookO
 
 export default function App() {
   const [profile, setProfile] = useState(null);
-  const [credits, setCredits] = useState(3);
+  const [credits, setCredits] = useState(2);
   const [currentView, setCurrentView] = useState('home');
   const [isFirstLaunch, setIsFirstLaunch] = useState(true);
   const [toast, setToast] = useState(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const APP_VERSION = "v1.1.0";
+  const APP_VERSION = "v1.2.0";
 
   useEffect(() => {
     // Check if it's iOS and not already installed
@@ -44,7 +44,7 @@ export default function App() {
     if (savedCredits) {
       setCredits(parseInt(savedCredits, 10));
     } else {
-      localStorage.setItem('unihub_credits', '3');
+      localStorage.setItem('unihub_credits', '2');
     }
   }, []);
 
@@ -93,6 +93,10 @@ export default function App() {
             <div>
               <h1 style={{ fontSize: '1.25rem', fontWeight: 700 }}>UniHub</h1>
               <div style={{ fontSize: '0.8rem', opacity: 0.9 }}>{profile.university}</div>
+            </div>
+            <div className="credit-badge">
+              <Award size={18} color="#20B2AA" />
+              <span>{credits} CR</span>
             </div>
           </header>
 
@@ -151,6 +155,19 @@ export default function App() {
               </button>
             </div>
             
+            <div className="changelog-item">
+              <div className="changelog-version">v1.2.0</div>
+              <div className="changelog-date">17 Maggio 2026</div>
+              <ul className="changelog-changes">
+                <li>Aggiunto bollino crediti nella barra superiore</li>
+                <li>Barra di navigazione fissa in basso</li>
+                <li>Aggiunto pulsante Modifica Profilo</li>
+                <li>Rimossa sezione Mappa</li>
+                <li>Aggiunto Match di Studio nelle attività</li>
+                <li>Fix definitivo schermata bianca iOS (Service Worker network-first)</li>
+              </ul>
+            </div>
+
             <div className="changelog-item">
               <div className="changelog-version">v1.1.0</div>
               <div className="changelog-date">16 Maggio 2026</div>
@@ -435,8 +452,8 @@ const HomeView = ({ profile, onShowInfo, onEditProfile }) => {
           <BookOpen size={24} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Ripetizioni di Analisi 1</div>
-          <div className="text-muted" style={{ fontSize: '0.8rem' }}>Con Marco Rossi • Domani, 15:00</div>
+          <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Innovazioni Metriche di Marketing</div>
+          <div className="text-muted" style={{ fontSize: '0.8rem' }}>Con Luigi Verdi • Domani, 15:00</div>
         </div>
       </div>
       
@@ -446,7 +463,7 @@ const HomeView = ({ profile, onShowInfo, onEditProfile }) => {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Match di Studio</div>
-          <div className="text-muted" style={{ fontSize: '0.8rem' }}>Con Giulia F. • Domani, 10:00</div>
+          <div className="text-muted" style={{ fontSize: '0.8rem' }}>Innovazioni Metriche di Marketing • Con Giulia F.</div>
         </div>
       </div>
       
