@@ -12,9 +12,12 @@
   <rect width="512" height="512" rx="112" fill="url(#bg-grad)" />
   
   <!-- Graduation Cap Motif -->
-  <g filter="url(#shadow)" transform="translate(64, 151) scale(1.5)">
+  <g filter="url(#shadow)" transform="translate(64, 143) scale(1.5)">
     <!-- Cap top -->
     <path d="M128 0 L256 60 L128 120 L0 60 Z" fill="#FFFFFF" />
+    
+    <!-- Cap base (skullcap) with a tiny gap to distinguish from the top -->
+    <path d="M64 93 L64 125 Q128 150 192 125 L192 93 L128 123 Z" fill="#FFFFFF" />
     
     <!-- Tassel -->
     <circle cx="128" cy="60" r="12" fill="#20B2AA" />
