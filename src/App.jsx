@@ -10,7 +10,7 @@ export default function App() {
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const APP_VERSION = "v1.2.0";
+  const APP_VERSION = "v1.3.0";
 
   useEffect(() => {
     // Check if it's iOS and not already installed
@@ -103,7 +103,7 @@ export default function App() {
 
           <nav className="bottom-nav">
             <NavItem icon={<Home />} label="Home" active={currentView === 'home'} onClick={() => setCurrentView('home')} />
-            <NavItem icon={<List />} label="Annunci" active={currentView === 'bacheca'} onClick={() => setCurrentView('bacheca')} />
+            <NavItem icon={<List />} label="Match Studio" active={currentView === 'bacheca'} onClick={() => setCurrentView('bacheca')} />
             <NavItem icon={<Users />} label="Tutor" active={currentView === 'tutoring'} onClick={() => setCurrentView('tutoring')} />
             <NavItem icon={<MessageCircle />} label="Chat" active={currentView === 'chat'} onClick={() => setCurrentView('chat')} />
           </nav>
@@ -153,7 +153,18 @@ export default function App() {
             </div>
             
             <div className="changelog-item">
-              <div className="changelog-version">v1.2.0</div>
+               <div className="changelog-version">v1.3.0</div>
+               <div className="changelog-date">18 Maggio 2026</div>
+               <ul className="changelog-changes">
+                 <li>Sezione Annunci rinominata in "Match di studio"</li>
+                 <li>Aggiunta funzionalità "Crea Annuncio" in alto a destra</li>
+                 <li>Nuovo form modale per creare e pubblicare annunci personalizzati (salvati nel localStorage)</li>
+                 <li>Gli annunci seguono il formato "Cerco compagno di studio per [Materia]" e mostrano campi facoltativi</li>
+               </ul>
+             </div>
+
+             <div className="changelog-item">
+               <div className="changelog-version">v1.2.0</div>
               <div className="changelog-date">17 Maggio 2026</div>
               <ul className="changelog-changes">
                 <li>Aggiunto bollino crediti nella barra superiore</li>
@@ -483,25 +494,101 @@ const HomeView = ({ profile, onShowInfo, onEditProfile }) => {
 const BachecaView = ({ showToast, profile }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAd, setSelectedAd] = useState(null);
-  
-  // Gli annunci vengono filtrati automaticamente in base a università e corso dell'utente
-  const ads = [
-    { id: 1, title: 'Cerco compagno di studio per Innovazioni e Metriche di Marketing', subject: 'Innovazioni e Metriche di Marketing', professor: 'Prof. Luca Pellegrini', author: 'Marco T.', university: profile.university, degree: profile.degree, city: profile.city, description: 'Cerco compagni per prepararsi all\'esame di Innovazioni e Metriche di Marketing. Preferibilmente in zona Largo Gemelli, disponibile anche online.' },
-    { id: 2, title: 'Gruppo studio Economia e Gestione delle Imprese', subject: 'Economia e Gestione delle Imprese', professor: 'Prof.ssa Chiara Mauri', author: 'Giulia F.', university: profile.university, degree: profile.degree, city: profile.city, description: 'Sto cercando qualcuno per ripassare insieme i casi aziendali e prepararsi alle domande aperte dell\'esame.' },
-    { id: 3, title: 'Cerco partner di studio per Strategia Aziendale', subject: 'Strategia Aziendale', professor: 'Prof. Roberto Vaccà', author: 'Luca V.', university: profile.university, degree: profile.degree, city: profile.city, description: 'Vorrei formare un piccolo gruppo di studio per prepararsi al prossimo appello. Ho tutti gli appunti e le slide del professore.' }
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newAdSubject, setNewAdSubject] = useState('');
+  const [newAdProfessor, setNewAdProfessor] = useState('');
+  const [newAdAvailability, setNewAdAvailability] = useState('');
+
+  const [customAds, setCustomAds] = useState(() => {
+    const saved = localStorage.getItem('unihub_custom_ads');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const defaultAds = [
+    { 
+      id: 'def-1', 
+      subject: 'Innovazioni e Metriche di Marketing', 
+      professor: 'Prof. Luca Pellegrini', 
+      availability: 'Lunedì e Mercoledì dalle 14:00',
+      author: 'Marco T.', 
+      university: profile.university, 
+      degree: profile.degree, 
+      city: profile.city, 
+      description: 'Cerco compagni per prepararsi all\'esame di Innovazioni e Metriche di Marketing. Preferibilmente in zona Largo Gemelli, disponibile anche online.' 
+    },
+    { 
+      id: 'def-2', 
+      subject: 'Economia e Gestione delle Imprese', 
+      professor: 'Prof.ssa Chiara Mauri', 
+      availability: 'Martedì pomeriggio',
+      author: 'Giulia F.', 
+      university: profile.university, 
+      degree: profile.degree, 
+      city: profile.city, 
+      description: 'Sto cercando qualcuno per ripassare insieme i casi aziendali e prepararsi alle domande aperte dell\'esame.' 
+    },
+    { 
+      id: 'def-3', 
+      subject: 'Strategia Aziendale', 
+      professor: 'Prof. Roberto Vaccà', 
+      availability: 'Giovedì tutto il giorno',
+      author: 'Luca V.', 
+      university: profile.university, 
+      degree: profile.degree, 
+      city: profile.city, 
+      description: 'Vorrei formare un piccolo gruppo di studio per prepararsi al prossimo appello. Ho tutti gli appunti e le slide del professore.' 
+    }
   ];
 
+  const allAds = [...customAds, ...defaultAds];
+
   const filteredAds = searchQuery.trim() === '' 
-    ? ads 
-    : ads.filter(ad => 
+    ? allAds 
+    : allAds.filter(ad => 
         ad.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        ad.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         ad.professor.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
+  const handleSaveAd = (e) => {
+    e.preventDefault();
+    if (!newAdSubject.trim() || !newAdAvailability.trim()) {
+      showToast('Compila tutti i campi obbligatori!');
+      return;
+    }
+
+    const newAd = {
+      id: 'custom-' + Date.now(),
+      subject: newAdSubject.trim(),
+      professor: newAdProfessor.trim(),
+      availability: newAdAvailability.trim(),
+      author: profile.name || 'Studente',
+      university: profile.university,
+      degree: profile.degree,
+      city: profile.city,
+      description: `Cerco compagno di studio per preparare l'esame di ${newAdSubject.trim()} insieme.`,
+      isCustom: true
+    };
+
+    const updated = [newAd, ...customAds];
+    setCustomAds(updated);
+    localStorage.setItem('unihub_custom_ads', JSON.stringify(updated));
+    
+    setNewAdSubject('');
+    setNewAdProfessor('');
+    setNewAdAvailability('');
+    setShowCreateModal(false);
+    showToast('Annuncio pubblicato con successo!');
+  };
+
   return (
     <div className="container animate-fade-in">
-      <h2 className="title">Match di Studio</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+        <h2 className="title" style={{ margin: 0 }}>Match di Studio</h2>
+        <button className="btn btn-primary" style={{ width: 'auto', padding: '0.5rem 1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }} onClick={() => setShowCreateModal(true)}>
+          <Plus size={16} />
+          Crea Annuncio
+        </button>
+      </div>
       <p className="text-muted" style={{ marginBottom: '0.25rem' }}>Compagni di studio del tuo corso</p>
       <p className="text-muted" style={{ marginBottom: '1rem', fontSize: '0.8rem', fontStyle: 'italic' }}>{profile.degree} • {profile.university}</p>
       
@@ -525,15 +612,92 @@ const BachecaView = ({ showToast, profile }) => {
           <p className="text-muted">Nessun annuncio trovato{searchQuery ? ` per "${searchQuery}"` : ''}</p>
         </div>
       ) : (
-        filteredAds.map(ad => (
-          <div key={ad.id} className="card" style={{ cursor: 'pointer' }} onClick={() => setSelectedAd(ad)}>
-            <span className="badge" style={{ marginBottom: '0.5rem' }}>{ad.subject}</span>
-            <h3 style={{ fontSize: '1rem', marginBottom: '0.25rem' }}>{ad.title}</h3>
-            <p className="text-muted" style={{ fontSize: '0.85rem' }}>Pubblicato da {ad.author}</p>
-          </div>
-        ))
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {filteredAds.map(ad => (
+            <div key={ad.id} className="card" style={{ cursor: 'pointer', margin: 0 }} onClick={() => setSelectedAd(ad)}>
+              <span className="badge" style={{ marginBottom: '0.5rem' }}>{ad.subject}</span>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.4rem', color: 'var(--primary-navy)', lineHeight: 1.4 }}>
+                Cerco compagno di studio per {ad.subject}
+              </h3>
+              <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: ad.professor || ad.availability ? '0.25rem' : '0' }}>
+                Pubblicato da {ad.author}
+              </p>
+              {ad.professor && (
+                <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: ad.availability ? '0.25rem' : '0' }}>
+                  Professore: {ad.professor}
+                </p>
+              )}
+              {ad.availability && (
+                <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: 0 }}>
+                  Disponibilità: {ad.availability}
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
       )}
 
+      {/* MODAL CREA ANNUNCIO */}
+      {showCreateModal && (
+        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 className="subtitle" style={{ margin: 0 }}>Nuovo Match di Studio</h2>
+              <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <X size={24} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSaveAd}>
+              <div className="form-group">
+                <label className="label">Nome completo della materia *</label>
+                <input 
+                  type="text" 
+                  className="input-field" 
+                  placeholder="Es. Innovazioni e Metriche di Marketing" 
+                  value={newAdSubject}
+                  onChange={e => setNewAdSubject(e.target.value)}
+                  required 
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="label">Professore (facoltativo)</label>
+                <input 
+                  type="text" 
+                  className="input-field" 
+                  placeholder="Es. Prof. Luca Pellegrini" 
+                  value={newAdProfessor}
+                  onChange={e => setNewAdProfessor(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="label">Disponibilità (giorno e orario) *</label>
+                <input 
+                  type="text" 
+                  className="input-field" 
+                  placeholder="Es. Lunedì e Mercoledì dalle 14:00" 
+                  value={newAdAvailability}
+                  onChange={e => setNewAdAvailability(e.target.value)}
+                  required 
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => setShowCreateModal(false)}>
+                  Annulla
+                </button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
+                  Salva e Pubblica
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DETTAGLI ANNUNCIO */}
       {selectedAd && (
         <div className="modal-overlay" onClick={() => setSelectedAd(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -556,19 +720,37 @@ const BachecaView = ({ showToast, profile }) => {
             </div>
 
             <div style={{ marginBottom: '1.25rem' }}>
+              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '0.35rem' }}>Titolo</div>
+              <div style={{ fontWeight: 600, fontSize: '1rem', lineHeight: 1.4, color: 'var(--primary-navy)' }}>
+                Cerco compagno di studio per {selectedAd.subject}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '1.25rem' }}>
               <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '0.35rem' }}>Materia</div>
               <div style={{ fontWeight: 600, fontSize: '1rem' }}>{selectedAd.subject}</div>
             </div>
 
-            <div style={{ marginBottom: '1.25rem' }}>
-              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '0.35rem' }}>Professore</div>
-              <div style={{ fontWeight: 600, fontSize: '1rem' }}>{selectedAd.professor}</div>
-            </div>
+            {selectedAd.professor && (
+              <div style={{ marginBottom: '1.25rem' }}>
+                <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '0.35rem' }}>Professore</div>
+                <div style={{ fontWeight: 600, fontSize: '1rem' }}>{selectedAd.professor}</div>
+              </div>
+            )}
 
-            <div style={{ marginBottom: '1.5rem' }}>
-              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '0.35rem' }}>Descrizione</div>
-              <p style={{ fontSize: '0.9rem', lineHeight: 1.6, color: 'var(--text-color)' }}>{selectedAd.description}</p>
-            </div>
+            {selectedAd.availability && (
+              <div style={{ marginBottom: '1.25rem' }}>
+                <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '0.35rem' }}>Disponibilità</div>
+                <div style={{ fontWeight: 600, fontSize: '1rem' }}>{selectedAd.availability}</div>
+              </div>
+            )}
+
+            {selectedAd.description && (
+              <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '0.35rem' }}>Descrizione</div>
+                <p style={{ fontSize: '0.9rem', lineHeight: 1.6, color: 'var(--text-color)' }}>{selectedAd.description}</p>
+              </div>
+            )}
 
             <button className="btn btn-primary" onClick={() => { setSelectedAd(null); showToast('Richiesta di match inviata a ' + selectedAd.author + '!'); }}>
               Invia Richiesta di Match
