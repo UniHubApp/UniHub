@@ -35,6 +35,84 @@ export default function App() {
     localStorage.setItem('unihub_custom_ads', JSON.stringify(updated));
   };
 
+  const [chats, setChats] = useState(() => {
+    const saved = localStorage.getItem('unihub_chats');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.some(c => c.name === 'Marco Rossi' || c.subject.includes('Economia') || c.subject.includes('Metriche'))) {
+        localStorage.removeItem('unihub_chats');
+      } else {
+        return parsed;
+      }
+    }
+    return [
+      {
+        id: 'chat-2',
+        name: 'Giulia F.',
+        avatar: 'GF',
+        color: '#EC4899',
+        subject: 'Match Studio • Innovazioni e Metriche di Marketing',
+        status: 'Offline',
+        unread: 0,
+        messages: [
+          { id: 1, text: 'ciao, sono interessato al tuo annuncio', sender: 'user', time: 'Ieri' },
+          { id: 2, text: 'Ciao! Ottimo, ho anche gli appunti del professore. Ci sentiamo qui per organizzare!', sender: 'other', time: 'Ieri' }
+        ]
+      },
+      {
+        id: 'chat-3',
+        name: 'Luigi Verdi',
+        avatar: 'LV',
+        color: '#20B2AA',
+        subject: 'Ripetizioni • Innovazioni e Metriche di Marketing',
+        status: 'Online',
+        unread: 0,
+        messages: [
+          { id: 1, text: 'ciao, sono interessato al tuo annuncio', sender: 'user', time: 'Lunedì' },
+          { id: 2, text: 'Certissimo, ci vediamo in aula studio!', sender: 'other', time: 'Lunedì' }
+        ]
+      }
+    ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('unihub_chats', JSON.stringify(chats));
+  }, [chats]);
+
+  const handleSendRequest = (authorName, subjectName) => {
+    const cleanSubject = subjectName.trim();
+    const existingChat = chats.find(
+      c => c.name.toLowerCase() === authorName.toLowerCase() && 
+           c.subject.toLowerCase().includes(cleanSubject.toLowerCase())
+    );
+
+    if (!existingChat) {
+      const initials = authorName ? authorName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : '?';
+      const colors = ['#EC4899', '#20B2AA', '#F59E0B', '#3B82F6', '#8B5CF6', '#10B981'];
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      const newChat = {
+        id: 'chat-' + Date.now(),
+        name: authorName,
+        avatar: initials,
+        color: randomColor,
+        subject: `Match Studio • ${cleanSubject}`,
+        status: 'Online',
+        unread: 0,
+        messages: [
+          { id: 1, text: 'ciao, sono interessato al tuo annuncio', sender: 'user', time: timeString }
+        ]
+      };
+      
+      const updatedChats = [newChat, ...chats];
+      setChats(updatedChats);
+      localStorage.setItem('unihub_chats', JSON.stringify(updatedChats));
+    }
+
+    showToast(`Richiesta inviata! Messaggio inviato a ${authorName}.`);
+  };
+
   useEffect(() => {
     // Check if it's iOS and not already installed
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -105,10 +183,11 @@ export default function App() {
             profile={profile} 
             customAds={customAds}
             onAddAd={handleAddAd}
+            onSendRequest={handleSendRequest}
           />
         );
       case 'tutoring': return <TutoringView credits={credits} showToast={showToast} />;
-      case 'chat': return <ChatView />;
+      case 'chat': return <ChatView chats={chats} onChatsChange={setChats} />;
       default: 
         return (
           <HomeView 
@@ -670,7 +749,7 @@ const HomeView = ({ profile, onShowInfo, onEditProfile, customAds, onEditAd, onD
   );
 };
 
-const BachecaView = ({ showToast, profile, customAds, onAddAd }) => {
+const BachecaView = ({ showToast, profile, customAds, onAddAd, onSendRequest }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newAdSubject, setNewAdSubject] = useState('');
@@ -798,7 +877,7 @@ const BachecaView = ({ showToast, profile, customAds, onAddAd }) => {
                 {ad.availability && <div>Disponibilità: <strong>{ad.availability}</strong></div>}
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
-                <button className="btn btn-primary" style={{ width: 'auto', padding: '0.4rem 1rem', fontSize: '0.8rem' }} onClick={() => showToast('Richiesta di match inviata a ' + ad.author + '!')}>
+                <button className="btn btn-primary" style={{ width: 'auto', padding: '0.4rem 1rem', fontSize: '0.8rem' }} onClick={() => onSendRequest(ad.author, ad.subject)}>
                   Invia Richiesta
                 </button>
               </div>
@@ -921,54 +1000,10 @@ const TutoringView = ({ credits, showToast }) => {
   );
 };
 
-const ChatView = () => {
+const ChatView = ({ chats, onChatsChange }) => {
   const [activeChatId, setActiveChatId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [chats, setChats] = useState(() => {
-    const saved = localStorage.getItem('unihub_chats');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed.some(c => c.name === 'Marco Rossi')) {
-        localStorage.removeItem('unihub_chats');
-      } else {
-        return parsed;
-      }
-    }
-    return [
-      {
-        id: 'chat-2',
-        name: 'Giulia F.',
-        avatar: 'GF',
-        color: '#EC4899',
-        subject: 'Match Studio • Economia',
-        status: 'Offline',
-        unread: 0,
-        messages: [
-          { id: 1, text: 'ciao, sono interessato al tuo annuncio', sender: 'user', time: 'Ieri' },
-          { id: 2, text: 'Ciao! Ottimo, ho anche gli appunti del professore. Ci sentiamo qui per organizzare!', sender: 'other', time: 'Ieri' }
-        ]
-      },
-      {
-        id: 'chat-3',
-        name: 'Luigi Verdi',
-        avatar: 'LV',
-        color: '#20B2AA',
-        subject: 'Ripetizioni • Innovazioni Metriche',
-        status: 'Online',
-        unread: 0,
-        messages: [
-          { id: 1, text: 'ciao, sono interessato al tuo annuncio', sender: 'user', time: 'Lunedì' },
-          { id: 2, text: 'Certissimo, ci vediamo in aula studio!', sender: 'other', time: 'Lunedì' }
-        ]
-      }
-    ];
-  });
-
   const [inputMessage, setInputMessage] = useState('');
-
-  useEffect(() => {
-    localStorage.setItem('unihub_chats', JSON.stringify(chats));
-  }, [chats]);
 
   const activeChat = chats.find(c => c.id === activeChatId);
 
@@ -984,7 +1019,7 @@ const ChatView = () => {
       time: timeString
     };
 
-    setChats(prevChats => prevChats.map(c => {
+    onChatsChange(prevChats => prevChats.map(c => {
       if (c.id === activeChatId) {
         return {
           ...c,
@@ -998,7 +1033,7 @@ const ChatView = () => {
 
   const handleOpenChat = (chatId) => {
     setActiveChatId(chatId);
-    setChats(prevChats => prevChats.map(c => {
+    onChatsChange(prevChats => prevChats.map(c => {
       if (c.id === chatId) {
         return { ...c, unread: 0 };
       }
@@ -1013,7 +1048,17 @@ const ChatView = () => {
 
   if (activeChat) {
     return (
-      <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div className="animate-fade-in" style={{
+        position: 'fixed',
+        top: 0,
+        bottom: 'calc(58px + env(safe-area-inset-bottom))', // Just above bottom navigation bar!
+        left: 0,
+        right: 0,
+        zIndex: 999,
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#F8FAFC'
+      }}>
         {/* HEADER CHAT */}
         <div style={{ padding: '0.75rem 1rem', background: 'white', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
           <button onClick={() => setActiveChatId(null)} style={{ background: 'none', border: 'none', color: 'var(--primary-navy)', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
