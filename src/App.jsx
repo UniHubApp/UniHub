@@ -50,7 +50,7 @@ export default function App() {
     const saved = localStorage.getItem('unihub_chats');
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (parsed.some(c => c.name === 'Marco Rossi' || c.subject.includes('Economia') || c.subject.includes('Metriche'))) {
+      if (parsed.some(c => c.name === 'Marco Rossi' || c.subject.includes('Economia') || c.subject.includes('Metriche') || (c.name === 'Luigi Verdi' && c.messages.length > 1))) {
         localStorage.removeItem('unihub_chats');
       } else {
         return parsed;
@@ -79,8 +79,7 @@ export default function App() {
         status: 'Online',
         unread: 0,
         messages: [
-          { id: 1, text: 'ciao, sono interessato al tuo annuncio', sender: 'user', time: 'Lunedì' },
-          { id: 2, text: 'Certissimo, ci vediamo in aula studio!', sender: 'other', time: 'Lunedì' }
+          { id: 1, text: 'ciao, sono interessato al tuo annuncio', sender: 'user', time: 'Lunedì' }
         ]
       }
     ];
@@ -93,8 +92,8 @@ export default function App() {
   const handleSendRequest = (authorName, subjectName) => {
     const cleanSubject = subjectName.trim();
     const existingChat = chats.find(
-      c => c.name.toLowerCase() === authorName.toLowerCase() && 
-           c.subject.toLowerCase().includes(cleanSubject.toLowerCase())
+      c => c.name.toLowerCase() === authorName.toLowerCase() &&
+        c.subject.toLowerCase().includes(cleanSubject.toLowerCase())
     );
 
     if (!existingChat) {
@@ -102,7 +101,7 @@ export default function App() {
       const colors = ['#EC4899', '#20B2AA', '#F59E0B', '#3B82F6', '#8B5CF6', '#10B981'];
       const randomColor = colors[Math.floor(Math.random() * colors.length)];
       const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      
+
       const newChat = {
         id: 'chat-' + Date.now(),
         name: authorName,
@@ -115,7 +114,7 @@ export default function App() {
           { id: 1, text: 'ciao, sono interessato al tuo annuncio', sender: 'user', time: timeString }
         ]
       };
-      
+
       const updatedChats = [newChat, ...chats];
       setChats(updatedChats);
       localStorage.setItem('unihub_chats', JSON.stringify(updatedChats));
@@ -128,7 +127,7 @@ export default function App() {
     // Check if it's iOS and not already installed
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-    
+
     // Support for Android (beforeinstallprompt)
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
@@ -146,12 +145,12 @@ export default function App() {
 
   useEffect(() => {
     const savedProfile = localStorage.getItem('unihub_profile');
-    
+
     if (savedProfile) {
       setProfile(JSON.parse(savedProfile));
       setIsFirstLaunch(false);
     }
-    
+
     // Forza sempre 2 crediti per il prototipo
     localStorage.setItem('unihub_credits', '2');
     setCredits(2);
@@ -173,48 +172,48 @@ export default function App() {
     if (isEditingProfile) {
       return <ProfileSetup onSave={saveProfile} initialData={profile} />;
     }
-    
+
     switch (currentView) {
-      case 'home': 
+      case 'home':
         return (
-          <HomeView 
-            profile={profile} 
-            onShowInfo={() => setShowChangelog(true)} 
-            onEditProfile={() => setIsEditingProfile(true)} 
+          <HomeView
+            profile={profile}
+            onShowInfo={() => setShowChangelog(true)}
+            onEditProfile={() => setIsEditingProfile(true)}
             customAds={customAds}
             onEditAd={handleEditAd}
             onDeleteAd={handleDeleteAd}
             showToast={showToast}
           />
         );
-      case 'bacheca': 
+      case 'bacheca':
         return (
-          <BachecaView 
-            showToast={showToast} 
-            profile={profile} 
+          <BachecaView
+            showToast={showToast}
+            profile={profile}
             customAds={customAds}
             onAddAd={handleAddAd}
             onSendRequest={handleSendRequest}
           />
         );
-      case 'tutoring': 
+      case 'tutoring':
         return (
-          <TutoringView 
-            credits={credits} 
-            showToast={showToast} 
-            profile={profile} 
-            customTutors={customTutors} 
-            onAddTutor={handleAddTutor} 
-            onSendRequest={handleSendRequest} 
+          <TutoringView
+            credits={credits}
+            showToast={showToast}
+            profile={profile}
+            customTutors={customTutors}
+            onAddTutor={handleAddTutor}
+            onSendRequest={handleSendRequest}
           />
         );
       case 'chat': return <ChatView chats={chats} onChatsChange={setChats} />;
-      default: 
+      default:
         return (
-          <HomeView 
-            profile={profile} 
-            onShowInfo={() => setShowChangelog(true)} 
-            onEditProfile={() => setIsEditingProfile(true)} 
+          <HomeView
+            profile={profile}
+            onShowInfo={() => setShowChangelog(true)}
+            onEditProfile={() => setIsEditingProfile(true)}
             customAds={customAds}
             onEditAd={handleEditAd}
             onDeleteAd={handleDeleteAd}
@@ -232,7 +231,7 @@ export default function App() {
           {toast}
         </div>
       )}
-      
+
       {isFirstLaunch ? (
         <main className="main-content">
           <ProfileSetup onSave={saveProfile} />
@@ -271,12 +270,12 @@ export default function App() {
                 <Home size={38} />
               </div>
             </div>
-            
+
             <div className="install-prompt-title">
               <h3>Installa UniHub</h3>
               <p>Aggiungi l'app alla schermata home per un'esperienza fluida e veloce.</p>
             </div>
-            
+
             <div className="install-steps">
               <div className="install-step">
                 <div className="step-icon"><Share size={18} /></div>
@@ -304,20 +303,20 @@ export default function App() {
                 <X size={24} />
               </button>
             </div>
-            
-            <div className="changelog-item">
-               <div className="changelog-version">v1.3.0</div>
-               <div className="changelog-date">18 Maggio 2026</div>
-               <ul className="changelog-changes">
-                 <li>Sezione Annunci rinominata in "Match di studio"</li>
-                 <li>Aggiunta funzionalità "Crea Annuncio" in alto a destra</li>
-                 <li>Nuovo form modale per creare e pubblicare annunci personalizzati (salvati nel localStorage)</li>
-                 <li>Gli annunci seguono il formato "Cerco compagno di studio per [Materia]" e mostrano campi facoltativi</li>
-               </ul>
-             </div>
 
-             <div className="changelog-item">
-               <div className="changelog-version">v1.2.0</div>
+            <div className="changelog-item">
+              <div className="changelog-version">v1.3.0</div>
+              <div className="changelog-date">18 Maggio 2026</div>
+              <ul className="changelog-changes">
+                <li>Sezione Annunci rinominata in "Match di studio"</li>
+                <li>Aggiunta funzionalità "Crea Annuncio" in alto a destra</li>
+                <li>Nuovo form modale per creare e pubblicare annunci personalizzati (salvati nel localStorage)</li>
+                <li>Gli annunci seguono il formato "Cerco compagno di studio per [Materia]" e mostrano campi facoltativi</li>
+              </ul>
+            </div>
+
+            <div className="changelog-item">
+              <div className="changelog-version">v1.2.0</div>
               <div className="changelog-date">17 Maggio 2026</div>
               <ul className="changelog-changes">
                 <li>Aggiunto bollino crediti nella barra superiore</li>
@@ -354,7 +353,7 @@ export default function App() {
           </div>
         </div>
       )}
-      
+
       <div className="version-tag">UniHub {APP_VERSION}</div>
     </div>
   );
@@ -378,7 +377,7 @@ const ProfileSetup = ({ onSave, initialData }) => {
     photo: null,
     exams: []
   });
-  
+
   const [currentExam, setCurrentExam] = useState({ name: '', grade: '' });
   const fileInputRef = useRef(null);
 
@@ -446,12 +445,12 @@ const ProfileSetup = ({ onSave, initialData }) => {
               <div className="photo-upload-btn" onClick={() => fileInputRef.current.click()}>
                 <Camera size={16} />
               </div>
-              <input 
-                type="file" 
-                accept="image/*" 
-                className="photo-input" 
-                ref={fileInputRef} 
-                onChange={handlePhotoUpload} 
+              <input
+                type="file"
+                accept="image/*"
+                className="photo-input"
+                ref={fileInputRef}
+                onChange={handlePhotoUpload}
               />
             </div>
             <p className="text-muted" style={{ fontSize: '0.75rem' }}>Foto (Facoltativa)</p>
@@ -459,32 +458,32 @@ const ProfileSetup = ({ onSave, initialData }) => {
 
           <div className="input-group">
             <label className="input-label">Nome e Cognome *</label>
-            <input required type="text" className="input-field" placeholder="Es. Mario Rossi" 
-              value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} />
+            <input required type="text" className="input-field" placeholder="Es. Mario Rossi"
+              value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
           </div>
 
           <div className="input-group">
             <label className="input-label">Università *</label>
-            <input required type="text" className="input-field" placeholder="Es. Università Cattolica del Sacro Cuore" 
-              value={formData.university} onChange={(e) => setFormData({...formData, university: e.target.value})} />
+            <input required type="text" className="input-field" placeholder="Es. Università Cattolica del Sacro Cuore"
+              value={formData.university} onChange={(e) => setFormData({ ...formData, university: e.target.value })} />
           </div>
 
           <div className="input-group">
             <label className="input-label">Città *</label>
-            <input required type="text" className="input-field" placeholder="Es. Milano" 
-              value={formData.city} onChange={(e) => setFormData({...formData, city: e.target.value})} />
+            <input required type="text" className="input-field" placeholder="Es. Milano"
+              value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} />
           </div>
 
           <div className="input-group">
             <label className="input-label">Dipartimento *</label>
-            <input required type="text" className="input-field" placeholder="Es. Economia" 
-              value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} />
+            <input required type="text" className="input-field" placeholder="Es. Economia"
+              value={formData.department} onChange={(e) => setFormData({ ...formData, department: e.target.value })} />
           </div>
 
           <div className="input-group">
             <label className="input-label">Tipo di Laurea *</label>
-            <select className="input-field" value={formData.degreeType} 
-              onChange={(e) => setFormData({...formData, degreeType: e.target.value})}>
+            <select className="input-field" value={formData.degreeType}
+              onChange={(e) => setFormData({ ...formData, degreeType: e.target.value })}>
               <option value="Triennale">Triennale</option>
               <option value="Magistrale">Magistrale</option>
             </select>
@@ -492,14 +491,14 @@ const ProfileSetup = ({ onSave, initialData }) => {
 
           <div className="input-group">
             <label className="input-label">Nome Corso di Laurea *</label>
-            <input required type="text" className="input-field" placeholder="Es. Direzione e Consulenza aziendale" 
-              value={formData.degree} onChange={(e) => setFormData({...formData, degree: e.target.value})} />
+            <input required type="text" className="input-field" placeholder="Es. Direzione e Consulenza aziendale"
+              value={formData.degree} onChange={(e) => setFormData({ ...formData, degree: e.target.value })} />
           </div>
-          
+
           <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: '1.5rem 0' }} />
-          
+
           <label className="input-label">Esami Sostenuti (Facoltativo)</label>
-          
+
           {formData.exams.length > 0 && (
             <div style={{ marginBottom: '1rem' }}>
               {formData.exams.map(exam => (
@@ -518,9 +517,9 @@ const ProfileSetup = ({ onSave, initialData }) => {
 
           <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
             <input type="text" className="input-field" placeholder="Materia" style={{ flex: 2 }}
-              value={currentExam.name} onChange={(e) => setCurrentExam({...currentExam, name: e.target.value})} />
+              value={currentExam.name} onChange={(e) => setCurrentExam({ ...currentExam, name: e.target.value })} />
             <input type="number" min="18" max="31" className="input-field" placeholder="Voto" style={{ flex: 1 }}
-              value={currentExam.grade} onChange={(e) => setCurrentExam({...currentExam, grade: e.target.value})} />
+              value={currentExam.grade} onChange={(e) => setCurrentExam({ ...currentExam, grade: e.target.value })} />
             <button type="button" className="btn btn-outline" style={{ width: 'auto', padding: '0.75rem' }} onClick={addExam}>
               <Plus size={20} />
             </button>
@@ -572,7 +571,7 @@ const HomeView = ({ profile, onShowInfo, onEditProfile, customAds, onEditAd, onD
     setEditingAd(null);
     showToast('Annuncio eliminato con successo!');
   };
-  
+
   return (
     <div className="container animate-fade-in" style={{ position: 'relative', minHeight: '100%' }}>
       <div className="card" style={{ textAlign: 'center', paddingTop: '1.5rem' }}>
@@ -582,7 +581,7 @@ const HomeView = ({ profile, onShowInfo, onEditProfile, customAds, onEditAd, onD
           ) : (
             <div className="profile-avatar">{initials}</div>
           )}
-          <button 
+          <button
             onClick={() => onShowInfo()}
             style={{ position: 'absolute', right: '0', top: '0', background: 'none', border: 'none', color: 'var(--primary-navy)', cursor: 'pointer' }}
           >
@@ -593,7 +592,7 @@ const HomeView = ({ profile, onShowInfo, onEditProfile, customAds, onEditAd, onD
         <p className="text-muted" style={{ marginBottom: '0.5rem' }}>
           {profile.degreeType} in {profile.degree} • {profile.university} ({profile.city})
         </p>
-        
+
         <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
           <button className="btn btn-outline" style={{ width: 'auto', fontSize: '0.85rem', padding: '0.4rem 1.5rem', borderRadius: '9999px' }} onClick={onEditProfile}>
             Modifica Profilo
@@ -685,20 +684,20 @@ const HomeView = ({ profile, onShowInfo, onEditProfile, customAds, onEditAd, onD
             <form onSubmit={handleSaveEdit}>
               <div className="form-group">
                 <label className="label">Nome completo della materia *</label>
-                <input 
-                  type="text" 
-                  className="input-field" 
+                <input
+                  type="text"
+                  className="input-field"
                   value={editSubject}
                   onChange={e => setEditSubject(e.target.value)}
-                  required 
+                  required
                 />
               </div>
 
               <div className="form-group">
                 <label className="label">Professore (facoltativo)</label>
-                <input 
-                  type="text" 
-                  className="input-field" 
+                <input
+                  type="text"
+                  className="input-field"
                   value={editProfessor}
                   onChange={e => setEditProfessor(e.target.value)}
                 />
@@ -706,9 +705,9 @@ const HomeView = ({ profile, onShowInfo, onEditProfile, customAds, onEditAd, onD
 
               <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                 <label className="label">Disponibilità (giorno e orario, facoltativa)</label>
-                <input 
-                  type="text" 
-                  className="input-field" 
+                <input
+                  type="text"
+                  className="input-field"
                   value={editAvailability}
                   onChange={e => setEditAvailability(e.target.value)}
                 />
@@ -741,13 +740,13 @@ const HomeView = ({ profile, onShowInfo, onEditProfile, customAds, onEditAd, onD
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '0.25rem' }}>Ripetizioni</div>
           <div className="text-muted" style={{ fontSize: '0.8rem', lineHeight: 1.5 }}>
-            Innovazioni e Metriche di Marketing<br/>
-            Con Luigi Verdi<br/>
+            Innovazioni e Metriche di Marketing<br />
+            Con Luigi Verdi<br />
             Domani, 15:00
           </div>
         </div>
       </div>
-      
+
       <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <div style={{ background: 'rgba(236, 72, 153, 0.1)', padding: '0.75rem', borderRadius: '50%', color: '#EC4899', flexShrink: 0 }}>
           <Users size={24} />
@@ -757,7 +756,7 @@ const HomeView = ({ profile, onShowInfo, onEditProfile, customAds, onEditAd, onD
           <div className="text-muted" style={{ fontSize: '0.8rem' }}>Innovazioni e Metriche di Marketing • Con Giulia F.</div>
         </div>
       </div>
-      
+
       <div style={{ textAlign: 'center', marginTop: '2rem' }}>
         <button className="btn btn-danger" style={{ width: 'auto', fontSize: '0.8rem', padding: '0.5rem 1rem' }} onClick={() => {
           localStorage.clear();
@@ -778,49 +777,49 @@ const BachecaView = ({ showToast, profile, customAds, onAddAd, onSendRequest }) 
   const [newAdAvailability, setNewAdAvailability] = useState('');
 
   const defaultAds = [
-    { 
-      id: 'def-1', 
-      subject: 'Innovazioni e Metriche di Marketing', 
-      professor: 'Prof. ***', 
+    {
+      id: 'def-1',
+      subject: 'Innovazioni e Metriche di Marketing',
+      professor: 'Prof. ***',
       availability: 'Lunedì e Mercoledì dalle 14:00',
-      author: 'Marco T.', 
-      university: profile.university, 
-      degree: profile.degree, 
-      city: profile.city, 
-      description: 'Cerco compagni per prepararsi all\'esame di Innovazioni e Metriche di Marketing. Preferibilmente in zona Largo Gemelli, disponibile anche online.' 
+      author: 'Marco T.',
+      university: profile.university,
+      degree: profile.degree,
+      city: profile.city,
+      description: 'Cerco compagni per prepararsi all\'esame di Innovazioni e Metriche di Marketing. Preferibilmente in zona Largo Gemelli, disponibile anche online.'
     },
-    { 
-      id: 'def-2', 
-      subject: 'Economia e Gestione delle Imprese', 
-      professor: 'Prof. ***', 
+    {
+      id: 'def-2',
+      subject: 'Economia e Gestione delle Imprese',
+      professor: 'Prof. ***',
       availability: '',
-      author: 'Giulia F.', 
-      university: profile.university, 
-      degree: profile.degree, 
-      city: profile.city, 
-      description: 'Sto cercando qualcuno per ripassare insieme i casi aziendali e prepararsi alle domande aperte dell\'esame.' 
+      author: 'Giulia F.',
+      university: profile.university,
+      degree: profile.degree,
+      city: profile.city,
+      description: 'Sto cercando qualcuno per ripassare insieme i casi aziendali e prepararsi alle domande aperte dell\'esame.'
     },
-    { 
-      id: 'def-3', 
-      subject: 'Strategia Aziendale', 
-      professor: 'Prof. ***', 
+    {
+      id: 'def-3',
+      subject: 'Strategia Aziendale',
+      professor: 'Prof. ***',
       availability: 'Giovedì tutto il giorno',
-      author: 'Luca V.', 
-      university: profile.university, 
-      degree: profile.degree, 
-      city: profile.city, 
-      description: 'Vorrei formare un piccolo gruppo di studio per prepararsi al prossimo appello. Ho tutti gli appunti e le slide del professore.' 
+      author: 'Luca V.',
+      university: profile.university,
+      degree: profile.degree,
+      city: profile.city,
+      description: 'Vorrei formare un piccolo gruppo di studio per prepararsi al prossimo appello. Ho tutti gli appunti e le slide del professore.'
     }
   ];
 
   const allAds = [...customAds, ...defaultAds];
 
-  const filteredAds = searchQuery.trim() === '' 
-    ? allAds 
-    : allAds.filter(ad => 
-        ad.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        ad.professor.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+  const filteredAds = searchQuery.trim() === ''
+    ? allAds
+    : allAds.filter(ad =>
+      ad.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ad.professor.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   const handleSaveAd = (e) => {
     e.preventDefault();
@@ -843,7 +842,7 @@ const BachecaView = ({ showToast, profile, customAds, onAddAd, onSendRequest }) 
     };
 
     onAddAd(newAd);
-    
+
     setNewAdSubject('');
     setNewAdProfessor('');
     setNewAdAvailability('');
@@ -862,13 +861,13 @@ const BachecaView = ({ showToast, profile, customAds, onAddAd, onSendRequest }) 
       </div>
       <p className="text-muted" style={{ marginBottom: '0.25rem' }}>Compagni di studio del tuo corso</p>
       <p className="text-muted" style={{ marginBottom: '1rem', fontSize: '0.8rem', fontStyle: 'italic' }}>{profile.degree} • {profile.university}</p>
-      
+
       <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
-        <input 
-          type="text" 
-          className="input-field" 
-          placeholder="Cerca per materia o professore..." 
-          value={searchQuery} 
+        <input
+          type="text"
+          className="input-field"
+          placeholder="Cerca per materia o professore..."
+          value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{ paddingLeft: '2.75rem', marginBottom: 0 }}
         />
@@ -917,26 +916,26 @@ const BachecaView = ({ showToast, profile, customAds, onAddAd, onSendRequest }) 
                 <X size={24} />
               </button>
             </div>
-            
+
             <form onSubmit={handleSaveAd}>
               <div className="form-group">
                 <label className="label">Nome completo della materia *</label>
-                <input 
-                  type="text" 
-                  className="input-field" 
-                  placeholder="Es. Innovazioni e Metriche di Marketing" 
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="Es. Innovazioni e Metriche di Marketing"
                   value={newAdSubject}
                   onChange={e => setNewAdSubject(e.target.value)}
-                  required 
+                  required
                 />
               </div>
 
               <div className="form-group">
                 <label className="label">Professore (facoltativo)</label>
-                <input 
-                  type="text" 
-                  className="input-field" 
-                  placeholder="Es. Prof. ***" 
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="Es. Prof. ***"
                   value={newAdProfessor}
                   onChange={e => setNewAdProfessor(e.target.value)}
                 />
@@ -944,10 +943,10 @@ const BachecaView = ({ showToast, profile, customAds, onAddAd, onSendRequest }) 
 
               <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                 <label className="label">Disponibilità (giorno e orario, facoltativa)</label>
-                <input 
-                  type="text" 
-                  className="input-field" 
-                  placeholder="Es. Lunedì e Mercoledì dalle 14:00" 
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="Es. Lunedì e Mercoledì dalle 14:00"
                   value={newAdAvailability}
                   onChange={e => setNewAdAvailability(e.target.value)}
                 />
@@ -984,7 +983,7 @@ const TutoringView = ({ credits, showToast, profile, customTutors, onAddTutor, o
 
   const allTutors = [...customTutors, ...defaultTutors];
 
-  const filteredTutors = allTutors.filter(t => 
+  const filteredTutors = allTutors.filter(t =>
     t.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (t.professor && t.professor.toLowerCase().includes(searchQuery.toLowerCase()))
   );
@@ -1019,11 +1018,11 @@ const TutoringView = ({ credits, showToast, profile, customTutors, onAddTutor, o
           {credits} Crediti
         </div>
       </div>
-      
+
       <div className="card" style={{ background: 'var(--primary-navy)', color: 'white', marginBottom: '1.5rem' }}>
         <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>Come funziona?</h3>
         <p style={{ fontSize: '0.9rem', opacity: 0.9, marginBottom: '1rem' }}>
-          1 Credito = 1 Ora di lezione.<br/>
+          1 Credito = 1 Ora di lezione.<br />
           Guadagna crediti offrendo ripetizioni, spendili per ricevere aiuto.
         </p>
         <button className="btn" style={{ background: 'white', color: 'var(--primary-navy)' }} onClick={() => setShowCreateModal(true)}>
@@ -1032,11 +1031,11 @@ const TutoringView = ({ credits, showToast, profile, customTutors, onAddTutor, o
       </div>
 
       <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
-        <input 
-          type="text" 
-          className="input-field" 
-          placeholder="Cerca per materia o professore..." 
-          value={searchQuery} 
+        <input
+          type="text"
+          className="input-field"
+          placeholder="Cerca per materia o professore..."
+          value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{ paddingLeft: '2.75rem', marginBottom: 0 }}
         />
@@ -1058,14 +1057,14 @@ const TutoringView = ({ credits, showToast, profile, customTutors, onAddTutor, o
                 <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--primary-navy)' }}>{tutor.name}</h3>
               </div>
               <p className="text-muted" style={{ margin: 0, fontSize: '0.9rem' }}>Materia: <strong>{tutor.subject}</strong></p>
-              
+
               <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
                 {tutor.professor && <div>Professore: <strong>{tutor.professor}</strong></div>}
                 {tutor.availability && <div>Disponibilità: <strong>{tutor.availability}</strong></div>}
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.25rem' }}>
-                <button className="btn btn-accent" style={{ width: 'auto', padding: '0.4rem 1rem', fontSize: '0.85rem' }} 
+                <button className="btn btn-accent" style={{ width: 'auto', padding: '0.4rem 1rem', fontSize: '0.85rem' }}
                   onClick={() => onSendRequest(tutor.name, tutor.subject)}>
                   Richiedi
                 </button>
@@ -1085,26 +1084,26 @@ const TutoringView = ({ credits, showToast, profile, customTutors, onAddTutor, o
                 <X size={24} />
               </button>
             </div>
-            
+
             <form onSubmit={handleSaveTutor}>
               <div className="form-group">
                 <label className="label">Nome completo della materia *</label>
-                <input 
-                  type="text" 
-                  className="input-field" 
-                  placeholder="Es. Innovazioni e Metriche di Marketing" 
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="Es. Innovazioni e Metriche di Marketing"
                   value={newSubject}
                   onChange={e => setNewSubject(e.target.value)}
-                  required 
+                  required
                 />
               </div>
 
               <div className="form-group">
                 <label className="label">Professore (facoltativo)</label>
-                <input 
-                  type="text" 
-                  className="input-field" 
-                  placeholder="Es. Prof. ***" 
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="Es. Prof. ***"
                   value={newProfessor}
                   onChange={e => setNewProfessor(e.target.value)}
                 />
@@ -1112,10 +1111,10 @@ const TutoringView = ({ credits, showToast, profile, customTutors, onAddTutor, o
 
               <div className="form-group" style={{ marginBottom: '1.5rem' }}>
                 <label className="label">Disponibilità (giorno e orario, facoltativa)</label>
-                <input 
-                  type="text" 
-                  className="input-field" 
-                  placeholder="Es. Lunedì e Mercoledì dalle 14:00" 
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="Es. Lunedì e Mercoledì dalle 14:00"
                   value={newAvailability}
                   onChange={e => setNewAvailability(e.target.value)}
                 />
@@ -1178,7 +1177,7 @@ const ChatView = ({ chats, onChatsChange }) => {
     }));
   };
 
-  const filteredChats = chats.filter(c => 
+  const filteredChats = chats.filter(c =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.subject.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -1201,11 +1200,11 @@ const ChatView = ({ chats, onChatsChange }) => {
           <button onClick={() => setActiveChatId(null)} style={{ background: 'none', border: 'none', color: 'var(--primary-navy)', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
             <ArrowLeft size={24} />
           </button>
-          
+
           <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: activeChat.color, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600 }}>
             {activeChat.avatar}
           </div>
-          
+
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '0.95rem' }}>{activeChat.name}</div>
             <div style={{ fontSize: '0.75rem', color: activeChat.status === 'Online' ? '#10B981' : 'var(--text-muted)', fontWeight: 600 }}>
@@ -1217,11 +1216,11 @@ const ChatView = ({ chats, onChatsChange }) => {
         {/* MESSAGES */}
         <div style={{ flex: 1, padding: '1rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', background: '#F8FAFC' }}>
           <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Conversazione per {activeChat.subject}</div>
-          
+
           {activeChat.messages.map(msg => (
             <div key={msg.id} className={`chat-message ${msg.sender === 'user' ? 'sent' : 'received'}`} style={{ alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%' }}>
-              <div className="chat-bubble" style={{ 
-                background: msg.sender === 'user' ? 'var(--primary-navy)' : 'white', 
+              <div className="chat-bubble" style={{
+                background: msg.sender === 'user' ? 'var(--primary-navy)' : 'white',
                 color: msg.sender === 'user' ? 'white' : 'var(--text-main)',
                 padding: '0.6rem 0.9rem',
                 borderRadius: '16px',
@@ -1243,11 +1242,11 @@ const ChatView = ({ chats, onChatsChange }) => {
         {/* INPUT */}
         <form onSubmit={handleSendMessage} style={{ padding: '0.75rem 1rem', background: 'white', borderTop: '1px solid var(--border-color)', flexShrink: 0 }}>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <input 
-              type="text" 
-              className="input-field" 
-              style={{ marginBottom: 0 }} 
-              placeholder="Scrivi un messaggio..." 
+            <input
+              type="text"
+              className="input-field"
+              style={{ marginBottom: 0 }}
+              placeholder="Scrivi un messaggio..."
               value={inputMessage}
               onChange={e => setInputMessage(e.target.value)}
             />
@@ -1265,13 +1264,13 @@ const ChatView = ({ chats, onChatsChange }) => {
       {/* HEADER ELENCO CHAT */}
       <div style={{ padding: '1.25rem 1.25rem 0.75rem 1.25rem', background: 'white', borderBottom: '1px solid var(--border-color)', flexShrink: 0 }}>
         <h2 className="title" style={{ margin: '0 0 0.75rem 0' }}>Chat</h2>
-        
+
         <div style={{ position: 'relative' }}>
-          <input 
-            type="text" 
-            className="input-field" 
-            placeholder="Cerca chat..." 
-            value={searchQuery} 
+          <input
+            type="text"
+            className="input-field"
+            placeholder="Cerca chat..."
+            value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{ paddingLeft: '2.5rem', marginBottom: 0, fontSize: '0.85rem', height: '36px' }}
           />
@@ -1289,16 +1288,16 @@ const ChatView = ({ chats, onChatsChange }) => {
           filteredChats.map(chat => {
             const lastMsg = chat.messages[chat.messages.length - 1];
             return (
-              <div 
-                key={chat.id} 
+              <div
+                key={chat.id}
                 onClick={() => handleOpenChat(chat.id)}
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '1rem', 
-                  padding: '1rem 1.25rem', 
-                  background: 'white', 
-                  borderBottom: '1px solid var(--border-color)', 
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem',
+                  padding: '1rem 1.25rem',
+                  background: 'white',
+                  borderBottom: '1px solid var(--border-color)',
                   cursor: 'pointer',
                   transition: 'background 0.2s'
                 }}
@@ -1322,7 +1321,7 @@ const ChatView = ({ chats, onChatsChange }) => {
                       {lastMsg ? lastMsg.time : ''}
                     </span>
                   </div>
-                  
+
                   <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.25rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {chat.subject}
                   </div>
@@ -1332,16 +1331,16 @@ const ChatView = ({ chats, onChatsChange }) => {
                       {lastMsg ? lastMsg.text : 'Nessun messaggio'}
                     </p>
                     {chat.unread > 0 && (
-                      <span style={{ 
-                        background: 'var(--accent-aqua)', 
-                        color: 'white', 
-                        fontSize: '0.7rem', 
-                        fontWeight: 700, 
-                        minWidth: '18px', 
-                        height: '18px', 
-                        borderRadius: '50%', 
-                        display: 'flex', 
-                        alignItems: 'center', 
+                      <span style={{
+                        background: 'var(--accent-aqua)',
+                        color: 'white',
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        minWidth: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
                         justifyContent: 'center',
                         padding: '0 4px'
                       }}>
