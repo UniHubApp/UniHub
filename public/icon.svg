@@ -11,12 +11,8 @@
   
   <rect width="512" height="512" rx="112" fill="url(#bg-grad)" />
   
-  <!-- Graduation Cap & Book Motif -->
-  <g filter="url(#shadow)" transform="translate(128, 140)">
-    <!-- Book -->
-    <path d="M128 140 L256 180 L256 260 L128 220 Z" fill="#20B2AA" />
-    <path d="M0 140 L128 180 L128 260 L0 220 Z" fill="#179992" />
-    
+  <!-- Graduation Cap Motif -->
+  <g filter="url(#shadow)" transform="translate(64, 151) scale(1.5)">
     <!-- Cap top -->
     <path d="M128 0 L256 60 L128 120 L0 60 Z" fill="#FFFFFF" />
     
@@ -24,7 +20,4 @@
     <circle cx="128" cy="60" r="12" fill="#20B2AA" />
     <path d="M128 60 Q180 80 190 140" fill="none" stroke="#20B2AA" stroke-width="8" stroke-linecap="round" />
   </g>
-  
-  <!-- Text Logo -->
-  <text x="256" y="420" font-family="Arial, sans-serif" font-weight="bold" font-size="72" fill="#FFFFFF" text-anchor="middle" letter-spacing="2">UniHub</text>
 </svg>
