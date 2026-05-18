@@ -12,6 +12,29 @@ export default function App() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const APP_VERSION = "v1.3.0";
 
+  const [customAds, setCustomAds] = useState(() => {
+    const saved = localStorage.getItem('unihub_custom_ads');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const handleAddAd = (newAd) => {
+    const updated = [newAd, ...customAds];
+    setCustomAds(updated);
+    localStorage.setItem('unihub_custom_ads', JSON.stringify(updated));
+  };
+
+  const handleEditAd = (updatedAd) => {
+    const updated = customAds.map(ad => ad.id === updatedAd.id ? updatedAd : ad);
+    setCustomAds(updated);
+    localStorage.setItem('unihub_custom_ads', JSON.stringify(updated));
+  };
+
+  const handleDeleteAd = (adId) => {
+    const updated = customAds.filter(ad => ad.id !== adId);
+    setCustomAds(updated);
+    localStorage.setItem('unihub_custom_ads', JSON.stringify(updated));
+  };
+
   useEffect(() => {
     // Check if it's iOS and not already installed
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -63,11 +86,41 @@ export default function App() {
     }
     
     switch (currentView) {
-      case 'home': return <HomeView profile={profile} onShowInfo={() => setShowChangelog(true)} onEditProfile={() => setIsEditingProfile(true)} />;
-      case 'bacheca': return <BachecaView showToast={showToast} profile={profile} />;
+      case 'home': 
+        return (
+          <HomeView 
+            profile={profile} 
+            onShowInfo={() => setShowChangelog(true)} 
+            onEditProfile={() => setIsEditingProfile(true)} 
+            customAds={customAds}
+            onEditAd={handleEditAd}
+            onDeleteAd={handleDeleteAd}
+            showToast={showToast}
+          />
+        );
+      case 'bacheca': 
+        return (
+          <BachecaView 
+            showToast={showToast} 
+            profile={profile} 
+            customAds={customAds}
+            onAddAd={handleAddAd}
+          />
+        );
       case 'tutoring': return <TutoringView credits={credits} showToast={showToast} />;
       case 'chat': return <ChatView />;
-      default: return <HomeView profile={profile} onShowInfo={() => setShowChangelog(true)} onEditProfile={() => setIsEditingProfile(true)} />;
+      default: 
+        return (
+          <HomeView 
+            profile={profile} 
+            onShowInfo={() => setShowChangelog(true)} 
+            onEditProfile={() => setIsEditingProfile(true)} 
+            customAds={customAds}
+            onEditAd={handleEditAd}
+            onDeleteAd={handleDeleteAd}
+            showToast={showToast}
+          />
+        );
     }
   };
 
@@ -382,9 +435,43 @@ const ProfileSetup = ({ onSave, initialData }) => {
   );
 };
 
-const HomeView = ({ profile, onShowInfo, onEditProfile }) => {
+const HomeView = ({ profile, onShowInfo, onEditProfile, customAds, onEditAd, onDeleteAd, showToast }) => {
   const [showExamsModal, setShowExamsModal] = useState(false);
+  const [editingAd, setEditingAd] = useState(null);
+  const [editSubject, setEditSubject] = useState('');
+  const [editProfessor, setEditProfessor] = useState('');
+  const [editAvailability, setEditAvailability] = useState('');
+
   const initials = profile.name ? profile.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : '?';
+
+  const openEditAdModal = (ad) => {
+    setEditingAd(ad);
+    setEditSubject(ad.subject);
+    setEditProfessor(ad.professor || '');
+    setEditAvailability(ad.availability || '');
+  };
+
+  const handleSaveEdit = (e) => {
+    e.preventDefault();
+    if (!editSubject.trim()) {
+      showToast('Nome materia obbligatorio!');
+      return;
+    }
+    onEditAd({
+      ...editingAd,
+      subject: editSubject.trim(),
+      professor: editProfessor.trim(),
+      availability: editAvailability.trim()
+    });
+    setEditingAd(null);
+    showToast('Annuncio modificato con successo!');
+  };
+
+  const handleDelete = () => {
+    onDeleteAd(editingAd.id);
+    setEditingAd(null);
+    showToast('Annuncio eliminato con successo!');
+  };
   
   return (
     <div className="container animate-fade-in">
@@ -454,6 +541,98 @@ const HomeView = ({ profile, onShowInfo, onEditProfile }) => {
         </div>
       )}
 
+      {/* I MIEI ANNUNCI SEZIONE */}
+      {customAds && customAds.length > 0 && (
+        <>
+          <h3 className="subtitle" style={{ marginBottom: '1rem', marginTop: '1.5rem' }}>I miei Annunci</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {customAds.map(ad => (
+              <div key={ad.id} className="card" style={{ cursor: 'pointer', margin: 0 }} onClick={() => openEditAdModal(ad)}>
+                <span className="badge" style={{ marginBottom: '0.5rem' }}>{ad.subject}</span>
+                <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.4rem', color: 'var(--primary-navy)', lineHeight: 1.4 }}>
+                  Cerco compagno di studio per {ad.subject}
+                </h3>
+                {ad.professor && (
+                  <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: ad.availability ? '0.25rem' : '0' }}>
+                    Professore: {ad.professor}
+                  </p>
+                )}
+                {ad.availability && (
+                  <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: 0 }}>
+                    Disponibilità: {ad.availability}
+                  </p>
+                )}
+                <div style={{ fontSize: '0.75rem', color: 'var(--primary-navy)', fontWeight: 600, marginTop: '0.5rem', textAlign: 'right' }}>
+                  Gestisci annuncio (modifica/elimina)
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* MODAL GESTIONE ANNUNCIO */}
+      {editingAd && (
+        <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }} onClick={() => setEditingAd(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 className="subtitle" style={{ margin: 0 }}>Gestisci Annuncio</h2>
+              <button onClick={() => setEditingAd(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <X size={24} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit}>
+              <div className="form-group">
+                <label className="label">Nome completo della materia *</label>
+                <input 
+                  type="text" 
+                  className="input-field" 
+                  value={editSubject}
+                  onChange={e => setEditSubject(e.target.value)}
+                  required 
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="label">Professore (facoltativo)</label>
+                <input 
+                  type="text" 
+                  className="input-field" 
+                  value={editProfessor}
+                  onChange={e => setEditProfessor(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="label">Disponibilità (giorno e orario, facoltativa)</label>
+                <input 
+                  type="text" 
+                  className="input-field" 
+                  value={editAvailability}
+                  onChange={e => setEditAvailability(e.target.value)}
+                />
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => setEditingAd(null)}>
+                    Annulla
+                  </button>
+                  <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
+                    Salva Modifiche
+                  </button>
+                </div>
+                <button type="button" className="btn btn-danger" style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }} onClick={handleDelete}>
+                  <Trash2 size={16} />
+                  Elimina Annuncio
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <h3 className="subtitle" style={{ marginBottom: '1rem', marginTop: '1.5rem' }}>Le tue attività</h3>
       <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <div style={{ background: '#E0F2FE', padding: '0.75rem', borderRadius: '50%', color: 'var(--primary-navy)', flexShrink: 0 }}>
@@ -491,18 +670,12 @@ const HomeView = ({ profile, onShowInfo, onEditProfile }) => {
   );
 };
 
-const BachecaView = ({ showToast, profile }) => {
+const BachecaView = ({ showToast, profile, customAds, onAddAd }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedAd, setSelectedAd] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newAdSubject, setNewAdSubject] = useState('');
   const [newAdProfessor, setNewAdProfessor] = useState('');
   const [newAdAvailability, setNewAdAvailability] = useState('');
-
-  const [customAds, setCustomAds] = useState(() => {
-    const saved = localStorage.getItem('unihub_custom_ads');
-    return saved ? JSON.parse(saved) : [];
-  });
 
   const defaultAds = [
     { 
@@ -551,8 +724,8 @@ const BachecaView = ({ showToast, profile }) => {
 
   const handleSaveAd = (e) => {
     e.preventDefault();
-    if (!newAdSubject.trim() || !newAdAvailability.trim()) {
-      showToast('Compila tutti i campi obbligatori!');
+    if (!newAdSubject.trim()) {
+      showToast('Nome materia obbligatorio!');
       return;
     }
 
@@ -569,9 +742,7 @@ const BachecaView = ({ showToast, profile }) => {
       isCustom: true
     };
 
-    const updated = [newAd, ...customAds];
-    setCustomAds(updated);
-    localStorage.setItem('unihub_custom_ads', JSON.stringify(updated));
+    onAddAd(newAd);
     
     setNewAdSubject('');
     setNewAdProfessor('');
@@ -614,24 +785,23 @@ const BachecaView = ({ showToast, profile }) => {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {filteredAds.map(ad => (
-            <div key={ad.id} className="card" style={{ cursor: 'pointer', margin: 0 }} onClick={() => setSelectedAd(ad)}>
-              <span className="badge" style={{ marginBottom: '0.5rem' }}>{ad.subject}</span>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.4rem', color: 'var(--primary-navy)', lineHeight: 1.4 }}>
+            <div key={ad.id} className="card" style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <span className="badge">{ad.subject}</span>
+              </div>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, margin: '0.25rem 0', color: 'var(--primary-navy)', lineHeight: 1.4 }}>
                 Cerco compagno di studio per {ad.subject}
               </h3>
-              <p className="text-muted" style={{ fontSize: '0.85rem', marginBottom: ad.professor || ad.availability ? '0.25rem' : '0' }}>
-                Pubblicato da {ad.author}
-              </p>
-              {ad.professor && (
-                <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: ad.availability ? '0.25rem' : '0' }}>
-                  Professore: {ad.professor}
-                </p>
-              )}
-              {ad.availability && (
-                <p className="text-muted" style={{ fontSize: '0.8rem', marginBottom: 0 }}>
-                  Disponibilità: {ad.availability}
-                </p>
-              )}
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <div>Pubblicato da <strong>{ad.author}</strong></div>
+                {ad.professor && <div>Professore: <strong>{ad.professor}</strong></div>}
+                {ad.availability && <div>Disponibilità: <strong>{ad.availability}</strong></div>}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                <button className="btn btn-primary" style={{ width: 'auto', padding: '0.4rem 1rem', fontSize: '0.8rem' }} onClick={() => showToast('Richiesta di match inviata a ' + ad.author + '!')}>
+                  Invia Richiesta
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -639,7 +809,7 @@ const BachecaView = ({ showToast, profile }) => {
 
       {/* MODAL CREA ANNUNCIO */}
       {showCreateModal && (
-        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+        <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }} onClick={() => setShowCreateModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <h2 className="subtitle" style={{ margin: 0 }}>Nuovo Match di Studio</h2>
@@ -673,14 +843,13 @@ const BachecaView = ({ showToast, profile }) => {
               </div>
 
               <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                <label className="label">Disponibilità (giorno e orario) *</label>
+                <label className="label">Disponibilità (giorno e orario, facoltativa)</label>
                 <input 
                   type="text" 
                   className="input-field" 
                   placeholder="Es. Lunedì e Mercoledì dalle 14:00" 
                   value={newAdAvailability}
                   onChange={e => setNewAdAvailability(e.target.value)}
-                  required 
                 />
               </div>
 
@@ -693,68 +862,6 @@ const BachecaView = ({ showToast, profile }) => {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL DETTAGLI ANNUNCIO */}
-      {selectedAd && (
-        <div className="modal-overlay" onClick={() => setSelectedAd(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 className="subtitle" style={{ margin: 0 }}>Dettaglio Annuncio</h2>
-              <button onClick={() => setSelectedAd(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
-                <X size={24} />
-              </button>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', paddingBottom: '1.25rem', borderBottom: '1px solid var(--border-color)' }}>
-              <div className="profile-avatar" style={{ width: '48px', height: '48px', fontSize: '1rem' }}>
-                {selectedAd.author.split(' ').map(n => n[0]).join('')}
-              </div>
-              <div>
-                <div style={{ fontWeight: 700 }}>{selectedAd.author}</div>
-                <div className="text-muted" style={{ fontSize: '0.8rem' }}>{selectedAd.university}</div>
-                <div className="text-muted" style={{ fontSize: '0.8rem' }}>{selectedAd.degree} • {selectedAd.city}</div>
-              </div>
-            </div>
-
-            <div style={{ marginBottom: '1.25rem' }}>
-              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '0.35rem' }}>Titolo</div>
-              <div style={{ fontWeight: 600, fontSize: '1rem', lineHeight: 1.4, color: 'var(--primary-navy)' }}>
-                Cerco compagno di studio per {selectedAd.subject}
-              </div>
-            </div>
-
-            <div style={{ marginBottom: '1.25rem' }}>
-              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '0.35rem' }}>Materia</div>
-              <div style={{ fontWeight: 600, fontSize: '1rem' }}>{selectedAd.subject}</div>
-            </div>
-
-            {selectedAd.professor && (
-              <div style={{ marginBottom: '1.25rem' }}>
-                <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '0.35rem' }}>Professore</div>
-                <div style={{ fontWeight: 600, fontSize: '1rem' }}>{selectedAd.professor}</div>
-              </div>
-            )}
-
-            {selectedAd.availability && (
-              <div style={{ marginBottom: '1.25rem' }}>
-                <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '0.35rem' }}>Disponibilità</div>
-                <div style={{ fontWeight: 600, fontSize: '1rem' }}>{selectedAd.availability}</div>
-              </div>
-            )}
-
-            {selectedAd.description && (
-              <div style={{ marginBottom: '1.5rem' }}>
-                <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.05em', marginBottom: '0.35rem' }}>Descrizione</div>
-                <p style={{ fontSize: '0.9rem', lineHeight: 1.6, color: 'var(--text-color)' }}>{selectedAd.description}</p>
-              </div>
-            )}
-
-            <button className="btn btn-primary" onClick={() => { setSelectedAd(null); showToast('Richiesta di match inviata a ' + selectedAd.author + '!'); }}>
-              Invia Richiesta di Match
-            </button>
           </div>
         </div>
       )}
