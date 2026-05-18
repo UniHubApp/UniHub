@@ -926,22 +926,15 @@ const ChatView = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [chats, setChats] = useState(() => {
     const saved = localStorage.getItem('unihub_chats');
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.some(c => c.name === 'Marco Rossi')) {
+        localStorage.removeItem('unihub_chats');
+      } else {
+        return parsed;
+      }
+    }
     return [
-      {
-        id: 'chat-1',
-        name: 'Marco Rossi',
-        avatar: 'MR',
-        color: 'var(--primary-navy)',
-        subject: 'Ripetizioni • Analisi 1',
-        status: 'Online',
-        unread: 1,
-        messages: [
-          { id: 1, text: 'Ciao! Ho visto che hai accettato la mia richiesta per le ripetizioni di Analisi 1.', sender: 'other', time: '14:30' },
-          { id: 2, text: 'Ciao Marco! Sì esatto. Quando saresti disponibile per iniziare?', sender: 'user', time: '14:35' },
-          { id: 3, text: 'Domani pomeriggio verso le 15:00 in biblioteca centrale andrebbe bene?', sender: 'other', time: '14:36' }
-        ]
-      },
       {
         id: 'chat-2',
         name: 'Giulia F.',
@@ -951,7 +944,7 @@ const ChatView = () => {
         status: 'Offline',
         unread: 0,
         messages: [
-          { id: 1, text: 'Ciao Giulia! Sarei interessato al match per preparare Economia e Gestione delle Imprese.', sender: 'user', time: 'Ieri' },
+          { id: 1, text: 'ciao, sono interessato al tuo annuncio', sender: 'user', time: 'Ieri' },
           { id: 2, text: 'Ciao! Ottimo, ho anche gli appunti del professore. Ci sentiamo qui per organizzare!', sender: 'other', time: 'Ieri' }
         ]
       },
@@ -964,7 +957,7 @@ const ChatView = () => {
         status: 'Online',
         unread: 0,
         messages: [
-          { id: 1, text: 'Ciao Luigi, confermato per domani alle 15:00?', sender: 'user', time: 'Lunedì' },
+          { id: 1, text: 'ciao, sono interessato al tuo annuncio', sender: 'user', time: 'Lunedì' },
           { id: 2, text: 'Certissimo, ci vediamo in aula studio!', sender: 'other', time: 'Lunedì' }
         ]
       }
