@@ -35,6 +35,17 @@ export default function App() {
     localStorage.setItem('unihub_custom_ads', JSON.stringify(updated));
   };
 
+  const [customTutors, setCustomTutors] = useState(() => {
+    const saved = localStorage.getItem('unihub_custom_tutors');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const handleAddTutor = (newTutor) => {
+    const updated = [newTutor, ...customTutors];
+    setCustomTutors(updated);
+    localStorage.setItem('unihub_custom_tutors', JSON.stringify(updated));
+  };
+
   const [chats, setChats] = useState(() => {
     const saved = localStorage.getItem('unihub_chats');
     if (saved) {
@@ -186,7 +197,17 @@ export default function App() {
             onSendRequest={handleSendRequest}
           />
         );
-      case 'tutoring': return <TutoringView credits={credits} showToast={showToast} />;
+      case 'tutoring': 
+        return (
+          <TutoringView 
+            credits={credits} 
+            showToast={showToast} 
+            profile={profile} 
+            customTutors={customTutors} 
+            onAddTutor={handleAddTutor} 
+            onSendRequest={handleSendRequest} 
+          />
+        );
       case 'chat': return <ChatView chats={chats} onChatsChange={setChats} />;
       default: 
         return (
@@ -236,7 +257,7 @@ export default function App() {
           <nav className="bottom-nav">
             <NavItem icon={<Home />} label="Home" active={currentView === 'home'} onClick={() => setCurrentView('home')} />
             <NavItem icon={<List />} label="Match Studio" active={currentView === 'bacheca'} onClick={() => setCurrentView('bacheca')} />
-            <NavItem icon={<Users />} label="Tutor" active={currentView === 'tutoring'} onClick={() => setCurrentView('tutoring')} />
+            <NavItem icon={<Users />} label="Peer-Tutoring" active={currentView === 'tutoring'} onClick={() => setCurrentView('tutoring')} />
             <NavItem icon={<MessageCircle />} label="Chat" active={currentView === 'chat'} onClick={() => setCurrentView('chat')} />
           </nav>
         </>
@@ -949,14 +970,48 @@ const BachecaView = ({ showToast, profile, customAds, onAddAd, onSendRequest }) 
 };
 
 
-const TutoringView = ({ credits, showToast }) => {
-  const tutors = [
-    { id: 1, name: 'Marco Rossi', subject: 'Analisi 1', rating: 4.8, cost: 1 },
-    { id: 2, name: 'Sara Bianchi', subject: 'Programmazione', rating: 5.0, cost: 2 }
+const TutoringView = ({ credits, showToast, profile, customTutors, onAddTutor, onSendRequest }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newSubject, setNewSubject] = useState('');
+  const [newProfessor, setNewProfessor] = useState('');
+  const [newAvailability, setNewAvailability] = useState('');
+
+  const defaultTutors = [
+    { id: 'tutor-1', name: 'Marco Rossi', subject: 'Analisi 1', professor: 'Prof. ***', availability: 'Lunedì e Mercoledì dalle 14:00' },
+    { id: 'tutor-2', name: 'Sara Bianchi', subject: 'Programmazione', professor: 'Prof. ***', availability: 'Martedì dalle 16:00' }
   ];
 
+  const allTutors = [...customTutors, ...defaultTutors];
+
+  const filteredTutors = allTutors.filter(t => 
+    t.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (t.professor && t.professor.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  const handleSaveTutor = (e) => {
+    e.preventDefault();
+    if (!newSubject.trim()) return;
+
+    const newTutor = {
+      id: 'custom-tutor-' + Date.now(),
+      name: profile.name || 'Studente',
+      subject: newSubject.trim(),
+      professor: newProfessor.trim(),
+      availability: newAvailability.trim()
+    };
+
+    onAddTutor(newTutor);
+
+    setNewSubject('');
+    setNewProfessor('');
+    setNewAvailability('');
+    setShowCreateModal(false);
+    showToast('Offerta di ripetizioni pubblicata!');
+  };
+
   return (
-    <div className="container animate-fade-in">
+    <div className="container animate-fade-in" style={{ position: 'relative', minHeight: '100%' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h2 className="title" style={{ margin: 0 }}>Peer-Tutoring</h2>
         <div className="badge" style={{ background: '#FEF3C7', color: '#D97706', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
@@ -965,37 +1020,119 @@ const TutoringView = ({ credits, showToast }) => {
         </div>
       </div>
       
-      <div className="card" style={{ background: 'var(--primary-navy)', color: 'white' }}>
+      <div className="card" style={{ background: 'var(--primary-navy)', color: 'white', marginBottom: '1.5rem' }}>
         <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>Come funziona?</h3>
         <p style={{ fontSize: '0.9rem', opacity: 0.9, marginBottom: '1rem' }}>
           1 Credito = 1 Ora di lezione.<br/>
           Guadagna crediti offrendo ripetizioni, spendili per ricevere aiuto.
         </p>
-        <button className="btn" style={{ background: 'white', color: 'var(--primary-navy)' }}>
+        <button className="btn" style={{ background: 'white', color: 'var(--primary-navy)' }} onClick={() => setShowCreateModal(true)}>
           Offri Ripetizioni (+1 CR/h)
         </button>
       </div>
 
-      <h3 className="subtitle" style={{ margin: '1.5rem 0 1rem' }}>Tutor Disponibili</h3>
-      {tutors.map(tutor => (
-        <div key={tutor.id} className="card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <h3 style={{ fontSize: '1.1rem' }}>{tutor.name}</h3>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.9rem', fontWeight: 600 }}>
-              <Star size={16} fill="#F59E0B" color="#F59E0B" />
-              {tutor.rating}
+      <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
+        <input 
+          type="text" 
+          className="input-field" 
+          placeholder="Cerca per materia o professore..." 
+          value={searchQuery} 
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{ paddingLeft: '2.75rem', marginBottom: 0 }}
+        />
+        <svg style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+      </div>
+
+      {filteredTutors.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
+          <p className="text-muted">Nessun tutor trovato{searchQuery ? ` per "${searchQuery}"` : ''}</p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {filteredTutors.map(tutor => (
+            <div key={tutor.id} className="card" style={{ margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--primary-navy)' }}>{tutor.name}</h3>
+              </div>
+              <p className="text-muted" style={{ margin: 0, fontSize: '0.9rem' }}>Materia: <strong>{tutor.subject}</strong></p>
+              
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
+                {tutor.professor && <div>Professore: <strong>{tutor.professor}</strong></div>}
+                {tutor.availability && <div>Disponibilità: <strong>{tutor.availability}</strong></div>}
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.25rem' }}>
+                <button className="btn btn-accent" style={{ width: 'auto', padding: '0.4rem 1rem', fontSize: '0.85rem' }} 
+                  onClick={() => onSendRequest(tutor.name, tutor.subject)}>
+                  Richiedi
+                </button>
+              </div>
             </div>
-          </div>
-          <p className="text-muted" style={{ marginBottom: '1rem' }}>Materia: <strong>{tutor.subject}</strong></p>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--primary-navy)' }}>Costo: {tutor.cost} CR/h</span>
-            <button className="btn btn-accent" style={{ width: 'auto', padding: '0.5rem 1rem' }} 
-              onClick={() => showToast(credits >= tutor.cost ? 'Richiesta di tutoring inviata!' : 'Crediti insufficienti!')}>
-              Richiedi
-            </button>
+          ))}
+        </div>
+      )}
+
+      {/* MODAL CREA OFFERTA TUTORING */}
+      {showCreateModal && (
+        <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, background: 'rgba(0,0,0,0.5)' }} onClick={() => setShowCreateModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 className="subtitle" style={{ margin: 0 }}>Nuova Offerta Ripetizioni</h2>
+              <button onClick={() => setShowCreateModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                <X size={24} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSaveTutor}>
+              <div className="form-group">
+                <label className="label">Nome completo della materia *</label>
+                <input 
+                  type="text" 
+                  className="input-field" 
+                  placeholder="Es. Innovazioni e Metriche di Marketing" 
+                  value={newSubject}
+                  onChange={e => setNewSubject(e.target.value)}
+                  required 
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="label">Professore (facoltativo)</label>
+                <input 
+                  type="text" 
+                  className="input-field" 
+                  placeholder="Es. Prof. ***" 
+                  value={newProfessor}
+                  onChange={e => setNewProfessor(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="label">Disponibilità (giorno e orario, facoltativa)</label>
+                <input 
+                  type="text" 
+                  className="input-field" 
+                  placeholder="Es. Lunedì e Mercoledì dalle 14:00" 
+                  value={newAvailability}
+                  onChange={e => setNewAvailability(e.target.value)}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => setShowCreateModal(false)}>
+                  Annulla
+                </button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
+                  Salva e Pubblica
+                </button>
+              </div>
+            </form>
           </div>
         </div>
-      ))}
+      )}
     </div>
   );
 };
