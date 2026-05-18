@@ -8,12 +8,12 @@
   "theme_color": "#1C355E",
   "icons": [
     {
-      "src": "/UniHub/icon.svg",
+      "src": "/UniHub/icon.svg?v=2",
       "sizes": "192x192",
       "type": "image/svg+xml"
     },
     {
-      "src": "/UniHub/icon.svg",
+      "src": "/UniHub/icon.svg?v=2",
       "sizes": "512x512",
       "type": "image/svg+xml"
     }
