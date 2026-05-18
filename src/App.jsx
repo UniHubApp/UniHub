@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Home, List, Users, MessageCircle, CheckCircle, Navigation, Award, BookOpen, Star, Send, Camera, Plus, Trash2, Share, PlusSquare, Info, X } from 'lucide-react';
+import { Home, List, Users, MessageCircle, CheckCircle, Navigation, Award, BookOpen, Star, Send, Camera, Plus, Trash2, Share, PlusSquare, Info, X, ArrowLeft, Search } from 'lucide-react';
 
 export default function App() {
   const [profile, setProfile] = useState(null);
@@ -922,44 +921,263 @@ const TutoringView = ({ credits, showToast }) => {
 };
 
 const ChatView = () => {
+  const [activeChatId, setActiveChatId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [chats, setChats] = useState(() => {
+    const saved = localStorage.getItem('unihub_chats');
+    if (saved) return JSON.parse(saved);
+    return [
+      {
+        id: 'chat-1',
+        name: 'Marco Rossi',
+        avatar: 'MR',
+        color: 'var(--primary-navy)',
+        subject: 'Ripetizioni • Analisi 1',
+        status: 'Online',
+        unread: 1,
+        messages: [
+          { id: 1, text: 'Ciao! Ho visto che hai accettato la mia richiesta per le ripetizioni di Analisi 1.', sender: 'other', time: '14:30' },
+          { id: 2, text: 'Ciao Marco! Sì esatto. Quando saresti disponibile per iniziare?', sender: 'user', time: '14:35' },
+          { id: 3, text: 'Domani pomeriggio verso le 15:00 in biblioteca centrale andrebbe bene?', sender: 'other', time: '14:36' }
+        ]
+      },
+      {
+        id: 'chat-2',
+        name: 'Giulia F.',
+        avatar: 'GF',
+        color: '#EC4899',
+        subject: 'Match Studio • Economia',
+        status: 'Offline',
+        unread: 0,
+        messages: [
+          { id: 1, text: 'Ciao Giulia! Sarei interessato al match per preparare Economia e Gestione delle Imprese.', sender: 'user', time: 'Ieri' },
+          { id: 2, text: 'Ciao! Ottimo, ho anche gli appunti del professore. Ci sentiamo qui per organizzare!', sender: 'other', time: 'Ieri' }
+        ]
+      },
+      {
+        id: 'chat-3',
+        name: 'Luigi Verdi',
+        avatar: 'LV',
+        color: '#20B2AA',
+        subject: 'Ripetizioni • Innovazioni Metriche',
+        status: 'Online',
+        unread: 0,
+        messages: [
+          { id: 1, text: 'Ciao Luigi, confermato per domani alle 15:00?', sender: 'user', time: 'Lunedì' },
+          { id: 2, text: 'Certissimo, ci vediamo in aula studio!', sender: 'other', time: 'Lunedì' }
+        ]
+      }
+    ];
+  });
+
+  const [inputMessage, setInputMessage] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem('unihub_chats', JSON.stringify(chats));
+  }, [chats]);
+
+  const activeChat = chats.find(c => c.id === activeChatId);
+
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (!inputMessage.trim() || !activeChatId) return;
+
+    const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const newMessage = {
+      id: Date.now(),
+      text: inputMessage.trim(),
+      sender: 'user',
+      time: timeString
+    };
+
+    setChats(prevChats => prevChats.map(c => {
+      if (c.id === activeChatId) {
+        return {
+          ...c,
+          messages: [...c.messages, newMessage]
+        };
+      }
+      return c;
+    }));
+    setInputMessage('');
+  };
+
+  const handleOpenChat = (chatId) => {
+    setActiveChatId(chatId);
+    setChats(prevChats => prevChats.map(c => {
+      if (c.id === chatId) {
+        return { ...c, unread: 0 };
+      }
+      return c;
+    }));
+  };
+
+  const filteredChats = chats.filter(c => 
+    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.subject.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  if (activeChat) {
+    return (
+      <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        {/* HEADER CHAT */}
+        <div style={{ padding: '0.75rem 1rem', background: 'white', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+          <button onClick={() => setActiveChatId(null)} style={{ background: 'none', border: 'none', color: 'var(--primary-navy)', cursor: 'pointer', padding: '0.25rem', display: 'flex', alignItems: 'center' }}>
+            <ArrowLeft size={24} />
+          </button>
+          
+          <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: activeChat.color, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600 }}>
+            {activeChat.avatar}
+          </div>
+          
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '0.95rem' }}>{activeChat.name}</div>
+            <div style={{ fontSize: '0.75rem', color: activeChat.status === 'Online' ? '#10B981' : 'var(--text-muted)', fontWeight: 600 }}>
+              {activeChat.status}
+            </div>
+          </div>
+        </div>
+
+        {/* MESSAGES */}
+        <div style={{ flex: 1, padding: '1rem', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', background: '#F8FAFC' }}>
+          <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Conversazione per {activeChat.subject}</div>
+          
+          {activeChat.messages.map(msg => (
+            <div key={msg.id} className={`chat-message ${msg.sender === 'user' ? 'sent' : 'received'}`} style={{ alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start', maxWidth: '80%' }}>
+              <div className="chat-bubble" style={{ 
+                background: msg.sender === 'user' ? 'var(--primary-navy)' : 'white', 
+                color: msg.sender === 'user' ? 'white' : 'var(--text-main)',
+                padding: '0.6rem 0.9rem',
+                borderRadius: '16px',
+                borderTopRightRadius: msg.sender === 'user' ? '4px' : '16px',
+                borderTopLeftRadius: msg.sender === 'user' ? '16px' : '4px',
+                boxShadow: 'var(--shadow-sm)',
+                fontSize: '0.9rem',
+                lineHeight: 1.4
+              }}>
+                {msg.text}
+              </div>
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.2rem', padding: '0 0.25rem', textAlign: msg.sender === 'user' ? 'right' : 'left' }}>
+                {msg.time}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* INPUT */}
+        <form onSubmit={handleSendMessage} style={{ padding: '0.75rem 1rem', background: 'white', borderTop: '1px solid var(--border-color)', flexShrink: 0 }}>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <input 
+              type="text" 
+              className="input-field" 
+              style={{ marginBottom: 0 }} 
+              placeholder="Scrivi un messaggio..." 
+              value={inputMessage}
+              onChange={e => setInputMessage(e.target.value)}
+            />
+            <button type="submit" className="btn btn-primary" style={{ width: 'auto', padding: '0.75rem' }}>
+              <Send size={20} />
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ padding: '1rem 1.5rem', background: 'white', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '1rem', flexShrink: 0 }}>
-        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--primary-navy)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600 }}>
-          MR
-        </div>
-        <div>
-          <div style={{ fontWeight: 600 }}>Marco Rossi</div>
-          <div style={{ fontSize: '0.8rem', color: '#10B981' }}>Online</div>
-        </div>
-      </div>
-
-      <div style={{ flex: 1, padding: '1.5rem', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Oggi</div>
+      {/* HEADER ELENCO CHAT */}
+      <div style={{ padding: '1.25rem 1.25rem 0.75rem 1.25rem', background: 'white', borderBottom: '1px solid var(--border-color)', flexShrink: 0 }}>
+        <h2 className="title" style={{ margin: '0 0 0.75rem 0' }}>Chat</h2>
         
-        <div className="chat-message received">
-          <div className="chat-bubble">Ciao! Ho visto che hai accettato la mia richiesta per le ripetizioni di Analisi 1.</div>
-          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.25rem', marginLeft: '0.5rem' }}>14:30</div>
-        </div>
-
-        <div className="chat-message sent">
-          <div className="chat-bubble">Ciao Marco! Sì esatto. Quando saresti disponibile per iniziare?</div>
-          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.25rem', marginRight: '0.5rem', textAlign: 'right' }}>14:35</div>
-        </div>
-
-        <div className="chat-message received">
-          <div className="chat-bubble">Domani pomeriggio verso le 15:00 in biblioteca centrale andrebbe bene?</div>
-          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.25rem', marginLeft: '0.5rem' }}>14:36</div>
+        <div style={{ position: 'relative' }}>
+          <input 
+            type="text" 
+            className="input-field" 
+            placeholder="Cerca chat..." 
+            value={searchQuery} 
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ paddingLeft: '2.5rem', marginBottom: 0, fontSize: '0.85rem', height: '36px' }}
+          />
+          <Search style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={16} />
         </div>
       </div>
 
-      <div style={{ padding: '1rem', background: 'white', borderTop: '1px solid var(--border-color)', flexShrink: 0 }}>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <input type="text" className="input-field" style={{ marginBottom: 0 }} placeholder="Scrivi un messaggio..." />
-          <button className="btn btn-primary" style={{ width: 'auto', padding: '0.75rem' }}>
-            <Send size={20} />
-          </button>
-        </div>
+      {/* ELENCO CHAT LIST */}
+      <div style={{ flex: 1, overflowY: 'auto', background: '#F8FAFC' }}>
+        {filteredChats.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '3rem 1.5rem', color: 'var(--text-muted)' }}>
+            Nessuna chat trovata.
+          </div>
+        ) : (
+          filteredChats.map(chat => {
+            const lastMsg = chat.messages[chat.messages.length - 1];
+            return (
+              <div 
+                key={chat.id} 
+                onClick={() => handleOpenChat(chat.id)}
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '1rem', 
+                  padding: '1rem 1.25rem', 
+                  background: 'white', 
+                  borderBottom: '1px solid var(--border-color)', 
+                  cursor: 'pointer',
+                  transition: 'background 0.2s'
+                }}
+                className="chat-list-item"
+              >
+                {/* Avatar */}
+                <div style={{ position: 'relative', flexShrink: 0 }}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: chat.color, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: '1.05rem' }}>
+                    {chat.avatar}
+                  </div>
+                  {chat.status === 'Online' && (
+                    <div style={{ position: 'absolute', bottom: '2px', right: '2px', width: '12px', height: '12px', borderRadius: '50%', background: '#10B981', border: '2px solid white' }} />
+                  )}
+                </div>
+
+                {/* Info */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.25rem' }}>
+                    <h4 style={{ margin: 0, fontWeight: 700, fontSize: '0.95rem', color: 'var(--primary-navy)' }}>{chat.name}</h4>
+                    <span style={{ fontSize: '0.7rem', color: chat.unread ? 'var(--accent-aqua)' : 'var(--text-muted)', fontWeight: chat.unread ? '700' : '400' }}>
+                      {lastMsg ? lastMsg.time : ''}
+                    </span>
+                  </div>
+                  
+                  <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.25rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {chat.subject}
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '85%' }}>
+                      {lastMsg ? lastMsg.text : 'Nessun messaggio'}
+                    </p>
+                    {chat.unread > 0 && (
+                      <span style={{ 
+                        background: 'var(--accent-aqua)', 
+                        color: 'white', 
+                        fontSize: '0.7rem', 
+                        fontWeight: 700, 
+                        minWidth: '18px', 
+                        height: '18px', 
+                        borderRadius: '50%', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        padding: '0 4px'
+                      }}>
+                        {chat.unread}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );
