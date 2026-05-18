@@ -474,7 +474,7 @@ const HomeView = ({ profile, onShowInfo, onEditProfile, customAds, onEditAd, onD
   };
   
   return (
-    <div className="container animate-fade-in">
+    <div className="container animate-fade-in" style={{ position: 'relative', minHeight: '100%' }}>
       <div className="card" style={{ textAlign: 'center', paddingTop: '1.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
           {profile.photo ? (
@@ -573,7 +573,7 @@ const HomeView = ({ profile, onShowInfo, onEditProfile, customAds, onEditAd, onD
 
       {/* MODAL GESTIONE ANNUNCIO */}
       {editingAd && (
-        <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }} onClick={() => setEditingAd(null)}>
+        <div className="modal-overlay" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }} onClick={() => setEditingAd(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <h2 className="subtitle" style={{ margin: 0 }}>Gestisci Annuncio</h2>
@@ -681,7 +681,7 @@ const BachecaView = ({ showToast, profile, customAds, onAddAd }) => {
     { 
       id: 'def-1', 
       subject: 'Innovazioni e Metriche di Marketing', 
-      professor: 'Prof. Luca Pellegrini', 
+      professor: 'Prof. ***', 
       availability: 'Lunedì e Mercoledì dalle 14:00',
       author: 'Marco T.', 
       university: profile.university, 
@@ -692,8 +692,8 @@ const BachecaView = ({ showToast, profile, customAds, onAddAd }) => {
     { 
       id: 'def-2', 
       subject: 'Economia e Gestione delle Imprese', 
-      professor: 'Prof.ssa Chiara Mauri', 
-      availability: 'Martedì pomeriggio',
+      professor: 'Prof. ***', 
+      availability: '',
       author: 'Giulia F.', 
       university: profile.university, 
       degree: profile.degree, 
@@ -703,7 +703,7 @@ const BachecaView = ({ showToast, profile, customAds, onAddAd }) => {
     { 
       id: 'def-3', 
       subject: 'Strategia Aziendale', 
-      professor: 'Prof. Roberto Vaccà', 
+      professor: 'Prof. ***', 
       availability: 'Giovedì tutto il giorno',
       author: 'Luca V.', 
       university: profile.university, 
@@ -752,7 +752,7 @@ const BachecaView = ({ showToast, profile, customAds, onAddAd }) => {
   };
 
   return (
-    <div className="container animate-fade-in">
+    <div className="container animate-fade-in" style={{ position: 'relative', minHeight: '100%' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
         <h2 className="title" style={{ margin: 0 }}>Match di Studio</h2>
         <button className="btn btn-primary" style={{ width: 'auto', padding: '0.5rem 1rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }} onClick={() => setShowCreateModal(true)}>
@@ -809,7 +809,7 @@ const BachecaView = ({ showToast, profile, customAds, onAddAd }) => {
 
       {/* MODAL CREA ANNUNCIO */}
       {showCreateModal && (
-        <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }} onClick={() => setShowCreateModal(false)}>
+        <div className="modal-overlay" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }} onClick={() => setShowCreateModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <h2 className="subtitle" style={{ margin: 0 }}>Nuovo Match di Studio</h2>
@@ -836,7 +836,7 @@ const BachecaView = ({ showToast, profile, customAds, onAddAd }) => {
                 <input 
                   type="text" 
                   className="input-field" 
-                  placeholder="Es. Prof. Luca Pellegrini" 
+                  placeholder="Es. Prof. ***" 
                   value={newAdProfessor}
                   onChange={e => setNewAdProfessor(e.target.value)}
                 />
