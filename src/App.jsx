@@ -977,8 +977,8 @@ const TutoringView = ({ credits, showToast, profile, customTutors, onAddTutor, o
   const [newAvailability, setNewAvailability] = useState('');
 
   const defaultTutors = [
-    { id: 'tutor-1', name: 'Marco Rossi', subject: 'Analisi 1', professor: 'Prof. ***', availability: 'Lunedì e Mercoledì dalle 14:00' },
-    { id: 'tutor-2', name: 'Sara Bianchi', subject: 'Programmazione', professor: 'Prof. ***', availability: 'Martedì dalle 16:00' }
+    { id: 'tutor-1', name: 'Luigi Verdi', subject: 'Innovazioni e Metriche di Marketing', availability: 'Lunedì e Mercoledì dalle 14:00' },
+    { id: 'tutor-2', name: 'Sara B.', subject: 'Programmazione', availability: 'Martedì dalle 16:00' }
   ];
 
   const allTutors = [...customTutors, ...defaultTutors];
