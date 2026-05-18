@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useRef } from 'react';
 import { Home, List, Users, MessageCircle, CheckCircle, Navigation, Award, BookOpen, Star, Send, Camera, Plus, Trash2, Share, PlusSquare, Info, X, ArrowLeft, Search } from 'lucide-react';
 
 export default function App() {
