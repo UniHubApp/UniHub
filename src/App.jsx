@@ -593,27 +593,17 @@ const HomeView = ({ profile, onShowInfo, onEditProfile, customAds, onEditAd, onD
           {profile.degreeType} in {profile.degree} • {profile.university} ({profile.city})
         </p>
 
-        <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
           <button className="btn btn-outline" style={{ width: 'auto', fontSize: '0.85rem', padding: '0.4rem 1.5rem', borderRadius: '9999px' }} onClick={onEditProfile}>
             Modifica Profilo
           </button>
+          {profile.exams && profile.exams.length > 0 && (
+            <button className="btn btn-accent" style={{ width: 'auto', fontSize: '0.85rem', padding: '0.4rem 1.5rem', borderRadius: '9999px' }} onClick={() => setShowExamsModal(true)}>
+              Vedi Esami ({profile.exams.length})
+            </button>
+          )}
         </div>
       </div>
-
-      {profile.exams && profile.exams.length > 0 && (
-        <>
-          <h3 className="subtitle" style={{ marginBottom: '1rem', marginTop: '1.5rem' }}>I tuoi Esami</h3>
-          <div className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onClick={() => setShowExamsModal(true)}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{ background: '#E0F2FE', padding: '0.75rem', borderRadius: '50%', color: 'var(--primary-navy)' }}>
-                <BookOpen size={24} />
-              </div>
-              <div style={{ fontWeight: 600 }}>Esami Sostenuti ({profile.exams.length})</div>
-            </div>
-            <div className="badge" style={{ cursor: 'pointer' }}>Vedi tutti</div>
-          </div>
-        </>
-      )}
 
       {showExamsModal && (
         <div className="modal-overlay" onClick={() => setShowExamsModal(false)}>
