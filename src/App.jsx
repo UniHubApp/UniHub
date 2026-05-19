@@ -10,7 +10,7 @@ export default function App() {
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const APP_VERSION = "v1.3.0";
+  const APP_VERSION = "v1.4.0";
 
   const [customAds, setCustomAds] = useState(() => {
     const saved = localStorage.getItem('unihub_custom_ads');
@@ -302,6 +302,18 @@ export default function App() {
               <button onClick={() => setShowChangelog(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
                 <X size={24} />
               </button>
+            </div>
+
+            <div className="changelog-item">
+              <div className="changelog-version">v1.4.0</div>
+              <div className="changelog-date">19 Maggio 2026</div>
+              <ul className="changelog-changes">
+                <li>Miglioramento della sezione Chat (creazione automatica conversazioni e barra di invio fissa)</li>
+                <li>Revisione della sezione Match Studio (sistemato layout, ricerca e annunci automatici)</li>
+                <li>Creata la nuova sezione Peer-Tutoring per offrire ripetizioni con i crediti</li>
+                <li>Nuova visualizzazione rapida e compatta degli esami direttamente dalla Home</li>
+                <li>Aggiornata l'icona dell'applicazione (nuovo tocco di laurea in SVG) e fix cache</li>
+              </ul>
             </div>
 
             <div className="changelog-item">
